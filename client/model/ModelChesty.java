@@ -82,10 +82,10 @@ public class ModelChesty extends ModelBase {
 	@Override
 	public void setRotationAngles(float par1, float par2, float par3, float par4, float par5, float par6, Entity par7Entity) {
 		super.setRotationAngles(par1, par2, par3, par4, par5, par6, par7Entity);
-        this.chestyLegFrontLeft.rotateAngleX = MathHelper.cos(par1 * 0.6662F) * 1.4F * par2;
-        this.chestyLegFrontRight.rotateAngleX = MathHelper.cos(par1 * 0.6662F + (float)Math.PI) * 1.4F * par2;
-        this.chestyLegBackLeft.rotateAngleX = MathHelper.cos(par1 * 0.6662F + (float)Math.PI) * 1.4F * par2;
-        this.chestyLegBackRight.rotateAngleX = MathHelper.cos(par1 * 0.6662F) * 1.4F * par2;
+        this.chestyLegFrontLeft.rotateAngleX = MathHelper.cos(par1 * 0.9992F) * 1.4F * par2;
+        this.chestyLegFrontRight.rotateAngleX = MathHelper.cos(par1 * 0.9992F + (float)Math.PI) * 1.4F * par2;
+        this.chestyLegBackLeft.rotateAngleX = MathHelper.cos(par1 * 0.9992F + (float)Math.PI) * 1.4F * par2;
+        this.chestyLegBackRight.rotateAngleX = MathHelper.cos(par1 * 0.9992F) * 1.4F * par2;
 		
 		EntityChesty chesty = (EntityChesty)par7Entity;
 		float var11 = chesty.prevLidAngle + (chesty.lidAngle - chesty.prevLidAngle);

@@ -7,10 +7,6 @@ import net.nexustools.chesty.inventory.ContainerChesty;
 import net.nexustools.chesty.entity.passive.EntityChesty;
 import org.lwjgl.opengl.GL11;
 
-/**
- *
- * @author Steve4448
- */
 public class GuiChesty extends GuiContainer {
 	int inventoryRows;
 	public GuiChesty(InventoryPlayer inventoryPlayer, EntityChesty chesty) {
@@ -21,7 +17,6 @@ public class GuiChesty extends GuiContainer {
 		inventoryRows = (chesty.getSizeInventory()) / 9;
 		inventoryRows += (inventoryPlayer.getSizeInventory()) / 9;
         this.ySize = var4 + inventoryRows * 18;
-		System.out.println(this.ySize);
 	}
 
 	/**

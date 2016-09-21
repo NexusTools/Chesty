@@ -5,16 +5,11 @@ import java.util.List;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.ai.EntityAIAttackOnCollide;
-import net.minecraft.entity.ai.EntityAIFleeSun;
 import net.minecraft.entity.ai.EntityAIFollowOwner;
 import net.minecraft.entity.ai.EntityAIHurtByTarget;
-import net.minecraft.entity.ai.EntityAILeapAtTarget;
-import net.minecraft.entity.ai.EntityAILookIdle;
 import net.minecraft.entity.ai.EntityAIOwnerHurtByTarget;
 import net.minecraft.entity.ai.EntityAIOwnerHurtTarget;
 import net.minecraft.entity.ai.EntityAISwimming;
-import net.minecraft.entity.ai.EntityAIWander;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
@@ -28,12 +23,9 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import net.nexustools.chesty.Chesty;
+import net.nexustools.chesty.entity.ai.EntityAIWanderWhenChestClosed;
 import net.nexustools.chesty.inventory.ContainerChesty;
 
-/**
- *
- * @author Steve4448
- */
 public class EntityChesty extends EntityTameable implements IInventory {
 	public static final int SPECIAL_SLOTS_SIZE = 6;
 	public static final int DEFAULT_ACTUAL_INVENTORY_SIZE = 18;
@@ -55,7 +47,7 @@ public class EntityChesty extends EntityTameable implements IInventory {
 		tasks.addTask(0, new EntityAISwimming(this));
 		tasks.addTask(1, new EntityAIFollowOwner(this, moveSpeed, 4, 6));
 		tasks.addTask(2, new EntityAIWatchClosest(this, EntityPlayer.class, 24.0F));
-		tasks.addTask(3, new EntityAIWander(this, moveSpeed));
+		tasks.addTask(3, new EntityAIWanderWhenChestClosed(this, moveSpeed));
 		targetTasks.addTask(1, new EntityAIOwnerHurtByTarget(this));
 		targetTasks.addTask(2, new EntityAIOwnerHurtTarget(this));
 		targetTasks.addTask(3, new EntityAIHurtByTarget(this, true));

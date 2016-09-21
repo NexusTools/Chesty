@@ -15,10 +15,6 @@ import net.minecraftforge.common.Configuration;
 import net.nexustools.chesty.entity.passive.EntityChesty;
 import net.nexustools.chesty.proxy.Proxy;
 
-/**
- *
- * @author Steve4448
- */
 @Mod(modid = "Chesty", name = "Chesty", version = "0.1")
 @NetworkMod(clientSideRequired = true)
 public class Chesty {

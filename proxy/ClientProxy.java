@@ -8,10 +8,6 @@ import net.nexustools.chesty.client.gui.GuiChesty;
 import net.nexustools.chesty.client.renderer.entity.RenderChesty;
 import net.nexustools.chesty.entity.passive.EntityChesty;
 
-/**
- *
- * @author Steve4448
- */
 public class ClientProxy extends Proxy {
 
 	@Override
