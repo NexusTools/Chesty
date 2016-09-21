@@ -50,16 +50,12 @@ public class EntityChesty extends EntityTameable implements IInventory {
 	public EntityChesty(World world) {
 		super(world);
 		texture = "/net/nexustools/chesty/client/model/ModelChesty.png";
-		moveSpeed = 0.3F;
+		moveSpeed = 0.5F;
 		setSize(0.8F, 1F);
 		tasks.addTask(0, new EntityAISwimming(this));
-		tasks.addTask(1, new EntityAIFleeSun(this, moveSpeed * 1.5F));
-		tasks.addTask(2, new EntityAIFollowOwner(this, 1, 10, 20));
-		tasks.addTask(3, new EntityAILeapAtTarget(this, 0.6F));
-		tasks.addTask(4, new EntityAIAttackOnCollide(this, EntityPlayer.class, moveSpeed * 1.5F, false));
-		tasks.addTask(5, new EntityAIWatchClosest(this, EntityPlayer.class, 24.0F));
-		tasks.addTask(6, new EntityAIWander(this, moveSpeed));
-		tasks.addTask(7, new EntityAILookIdle(this));
+		tasks.addTask(1, new EntityAIFollowOwner(this, moveSpeed, 4, 6));
+		tasks.addTask(2, new EntityAIWatchClosest(this, EntityPlayer.class, 24.0F));
+		tasks.addTask(3, new EntityAIWander(this, moveSpeed));
 		targetTasks.addTask(1, new EntityAIOwnerHurtByTarget(this));
 		targetTasks.addTask(2, new EntityAIOwnerHurtTarget(this));
 		targetTasks.addTask(3, new EntityAIHurtByTarget(this, true));
