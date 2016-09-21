@@ -2,6 +2,9 @@
 
 Chesty is simply a fully functioning chest with additional features that will loyally follow you around to the end of the world, always providing you portable storage.
 
+
+[![Chesty Mod 0.1 Example Video](https://img.youtube.com/vi/63oHPirTwLk/0.jpg)](https://www.youtube.com/watch?v=63oHPirTwLk)
+
 ### Currently Working Content
 * You can store a full set of armor, any sort of tool, and an additonal slot for whatever and then 18 items of your choice (9 less than a stationary chest).
 * Chesty can be tamed by simply interacting with him for now.
