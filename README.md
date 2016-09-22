@@ -7,12 +7,10 @@ Chesty is simply a fully functioning chest with additional features that will lo
 
 ### Currently Working Content
 * You can store a full set of armor, any sort of tool, and an additonal slot for whatever and then 18 items of your choice (9 less than a stationary chest).
-* Chesty can be tamed by simply interacting with him for now.
-* Chesty follows you once tamed
+* You use a rod to spawn him, while you have the rod with you he will remain spawned. You can shift+click the rod to despawn him as you please.
+* The Chesty Rod is the actual item storage, meaning you can kill other people for the rods and actually loot their items by spawning their  Chesty (Which also happens to be yours at that point).
 
 ### Planned/Potential Content
-* A rod that, when carried, will actually spawn Chesty.
-* If a player kills a person with the rod, allow them to steal that Chesty's contents.
 * A slot for food in Chesty to allow Chesty to heal himself.
 * Ability to armor Chesty
 * Potential chest upgrades based on the IronChests, which could be increase size and the base armor of Chesty.
