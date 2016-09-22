@@ -32,12 +32,14 @@ public class EntityChesty extends EntityTameable implements IInventory {
 	private int itemInUseCount;
 
 	public String inventoryTitle;
-	private int slotsCount;
-	private ItemStack[] inventoryContents;
+	public int slotsCount;
+	public ItemStack[] inventoryContents;
 	public float prevLidAngle = 0;
 	public float lidAngle = 0;
 	public int ticksSinceSync = 0;
 	public int numUsingPlayers = 0;
+	public ItemStack chestyRod;
+	public boolean spawnParticles = false;
 
 	public EntityChesty(World world) {
 		super(world);
@@ -59,19 +61,40 @@ public class EntityChesty extends EntityTameable implements IInventory {
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
-		if(!worldObj.isRemote && numUsingPlayers != 0 && ++ticksSinceSync % 60 == 0) {
-			numUsingPlayers = 0;
-			float var1 = 5.0F;
-			List var2 = worldObj.getEntitiesWithinAABB(EntityPlayer.class, AxisAlignedBB.getAABBPool().addOrModifyAABBInPool((double) ((float) posX - var1), (double) ((float) posY - var1), (double) ((float) posZ - var1), (double) ((float) (posX + 1) + var1), (double) ((float) (posY + 1) + var1), (double) ((float) (posZ + 1) + var1)));
-			Iterator var3 = var2.iterator();
+		if(!worldObj.isRemote && ++ticksSinceSync % 60 == 0) {
+			if(chestyRod == null || getOwner() == null || getOwner().worldObj != worldObj || getOwner().dimension != dimension) {
+				setDead();
+				if(chestyRod != null) {
+					chestyRod.getTagCompound().removeTag("ChestyEntity");
+				}
+				return;
+			} else {
+				EntityPlayer owner = (EntityPlayer)getOwner();
+				if(findChestyRodOnPlayer(owner, chestyRod) == null) {
+					setDead();
+					chestyRod.getTagCompound().removeTag("ChestyEntity");
+					return;
+				}
+			}
+			if(numUsingPlayers != 0) {
+				numUsingPlayers = 0;
+				float var1 = 5.0F;
+				List var2 = worldObj.getEntitiesWithinAABB(EntityPlayer.class, AxisAlignedBB.getAABBPool().addOrModifyAABBInPool((double) ((float) posX - var1), (double) ((float) posY - var1), (double) ((float) posZ - var1), (double) ((float) (posX + 1) + var1), (double) ((float) (posY + 1) + var1), (double) ((float) (posZ + 1) + var1)));
+				Iterator var3 = var2.iterator();
 
-			while(var3.hasNext()) {
-				EntityPlayer var4 = (EntityPlayer) var3.next();
-				if(var4.openContainer instanceof ContainerChesty) {
-					if(((ContainerChesty) var4.openContainer).chesty == this) {
-						++numUsingPlayers;
+				while(var3.hasNext()) {
+					EntityPlayer var4 = (EntityPlayer) var3.next();
+					if(var4.openContainer instanceof ContainerChesty) {
+						if(((ContainerChesty) var4.openContainer).chesty == this) {
+							++numUsingPlayers;
+						}
 					}
 				}
+			}
+		} else if(!spawnParticles && worldObj.isRemote) {
+			spawnParticles = true;
+			for(int i = 0; i < 100; i++) {
+				worldObj.spawnParticle("enchantmenttable", posX + (rand.nextDouble() * 2.5) - (rand.nextDouble() * 2.5), posY + (rand.nextDouble() * 2.5) - (rand.nextDouble() * 2.5), posZ + (rand.nextDouble() * 2.5) - (rand.nextDouble() * 2.5), (rand.nextDouble() * 2.5) - (rand.nextDouble() * 2.5), (rand.nextDouble() * 2.5) - (rand.nextDouble() * 2.5), (rand.nextDouble() * 2.5) - (rand.nextDouble() * 2.5));
 			}
 		}
 
@@ -114,10 +137,6 @@ public class EntityChesty extends EntityTameable implements IInventory {
 			Chesty.setLastInteract(this);
 			return true;
 		} else {
-			setTamed(true); //Todo: Proper way to tame Chesty, for now just automatically tamed whenever you first interact.
-			this.setPathToEntity((PathEntity)null);
-			this.setAttackTarget((EntityLiving)null);
-			this.setOwner(par1EntityPlayer.username);
 			Chesty.setLastInteractRemote(this);
 			if(isTamed() && getOwnerName().equals(par1EntityPlayer.username)) {
 				par1EntityPlayer.openGui(Chesty.instance(), 0, worldObj, (int) posX, (int) posY, (int) posZ);
@@ -171,44 +190,20 @@ public class EntityChesty extends EntityTameable implements IInventory {
 
 	@Override
 	protected boolean canDespawn() {
-		return !isTamed();
+		return !isTamed() || getOwner() == null;
+	}
+	
+	@Override
+	public void setDead() {
+		super.setDead();
+		if(worldObj.isRemote)
+			for(int i = 0; i < 100; i++) {
+				worldObj.spawnParticle("enchantmenttable", posX + (rand.nextDouble() * 2.5) - (rand.nextDouble() * 2.5), posY + (rand.nextDouble() * 2.5) - (rand.nextDouble() * 2.5), posZ + (rand.nextDouble() * 2.5) - (rand.nextDouble() * 2.5), (rand.nextDouble() * 2.5) - (rand.nextDouble() * 2.5), (rand.nextDouble() * 2.5) - (rand.nextDouble() * 2.5), (rand.nextDouble() * 2.5) - (rand.nextDouble() * 2.5));
+			}
 	}
 
 	public int getItemInUseCount() {
 		return itemInUseCount;
-	}
-
-	@Override
-	public void readFromNBT(NBTTagCompound par1NBTTagCompound) {
-		super.readFromNBT(par1NBTTagCompound);
-		String version = par1NBTTagCompound.getString("version");
-		System.out.println("Chesty version is " + version);
-		NBTTagList var2 = par1NBTTagCompound.getTagList("Items");
-		slotsCount = Math.max(DEFAULT_ACTUAL_INVENTORY_SIZE+SPECIAL_SLOTS_SIZE, var2.tagCount());
-		inventoryContents = new ItemStack[slotsCount+1];
-		for(int var3 = 0; var3 < var2.tagCount(); ++var3) {
-			NBTTagCompound var4 = (NBTTagCompound) var2.tagAt(var3);
-			int var5 = var4.getByte("Slot") & 255;
-			setInventorySlotContents(var5, ItemStack.loadItemStackFromNBT(var4));
-		}
-	}
-
-	@Override
-	public void writeToNBT(NBTTagCompound par1NBTTagCompound) {
-		super.writeToNBT(par1NBTTagCompound);
-		par1NBTTagCompound.setString("version", Chesty.version);
-		NBTTagList var2 = new NBTTagList();
-
-		for(int var3 = 0; var3 < getSizeInventory(); ++var3) {
-			if(getStackInSlot(var3) != null) {
-				NBTTagCompound var4 = new NBTTagCompound();
-				var4.setByte("Slot", (byte) var3);
-				getStackInSlot(var3).writeToNBT(var4);
-				var2.appendTag(var4);
-			}
-		}
-
-		par1NBTTagCompound.setTag("Items", var2);
 	}
 
 	/**
@@ -312,7 +307,19 @@ public class EntityChesty extends EntityTameable implements IInventory {
 	 */
 	@Override
 	public void onInventoryChanged() {
-
+		if(chestyRod != null && !worldObj.isRemote && getOwner() != null && getOwner() instanceof EntityPlayer) {
+			ItemStack actualRod = findChestyRodOnPlayer((EntityPlayer)getOwner(), chestyRod);
+			NBTTagList var2 = new NBTTagList();
+			for(int var3 = 0; var3 < getSizeInventory(); ++var3) {
+				if(getStackInSlot(var3) != null) {
+					NBTTagCompound var4 = new NBTTagCompound();
+					var4.setByte("Slot", (byte) var3);
+					getStackInSlot(var3).writeToNBT(var4);
+					var2.appendTag(var4);
+				}
+			}
+			actualRod.getTagCompound().setTag("ChestyItems", var2);
+		}
 	}
 
 	/**
@@ -333,5 +340,16 @@ public class EntityChesty extends EntityTameable implements IInventory {
 	@Override
 	public void closeChest() {
 		--numUsingPlayers;
+	}
+	
+	public static ItemStack findChestyRodOnPlayer(EntityPlayer player, ItemStack chestyRod) {
+		for(ItemStack mainInventoryItem : player.inventory.mainInventory) {
+			if(mainInventoryItem == null || !mainInventoryItem.hasTagCompound())
+				continue;
+			if(chestyRod.getTagCompound().getInteger("ChestyEntity") == mainInventoryItem.getTagCompound().getInteger("ChestyEntity")) {
+				return mainInventoryItem;
+			}
+		}
+		return null;
 	}
 }

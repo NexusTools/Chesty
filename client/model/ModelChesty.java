@@ -88,11 +88,7 @@ public class ModelChesty extends ModelBase {
         this.chestyLegBackRight.rotateAngleX = MathHelper.cos(par1 * 0.9992F) * 1.4F * par2;
 		
 		EntityChesty chesty = (EntityChesty)par7Entity;
-		float var11 = chesty.prevLidAngle + (chesty.lidAngle - chesty.prevLidAngle);
-		var11 = 1.0F - var11;
-        var11 = 1.0F - var11 * var11 * var11;
-		
-		chestyLid.rotateAngleX = -(var11 * (float)Math.PI / 2.0F);
+		chestyLid.rotateAngleX = -(chesty.lidAngle * (float)Math.PI / 2.0F); //TODO: find out how to smooth the animation more?
 		chestyLock.rotateAngleX = chestyLid.rotateAngleX;
 	}
 }

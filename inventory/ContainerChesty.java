@@ -8,6 +8,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ICrafting;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.nexustools.chesty.Chesty;
 import net.nexustools.chesty.entity.passive.EntityChesty;
 
 public class ContainerChesty extends Container {
@@ -66,6 +67,16 @@ public class ContainerChesty extends Container {
 		return this.chesty.isUseableByPlayer(par1EntityPlayer);
 	}
 
+	@Override
+	public ItemStack slotClick(int par1, int par2, int par3, EntityPlayer par4EntityPlayer) {
+		if(par1 >= 0) { //Prevents you from trying to click on the Chesty Rods. Currently how I'm preventing them from storing them inside Chesty. Need a better way though.
+			Slot s = (Slot)this.inventorySlots.get(par1);
+			if(s != null && s.getStack() != null && s.getStack().getItem() == Chesty.chestyRod) {
+				return null;
+			}
+		}
+		return super.slotClick(par1, par2, par3, par4EntityPlayer);
+	}
 	/**
 	 * Called when a player shift-clicks on a slot. You must override this or
 	 * you will crash when someone does that.
@@ -74,9 +85,11 @@ public class ContainerChesty extends Container {
 	public ItemStack transferStackInSlot(EntityPlayer par1EntityPlayer, int slot) {
 		ItemStack var3 = null;
 		Slot var4 = (Slot) this.inventorySlots.get(slot);
-
 		if(var4 != null && var4.getHasStack()) {
 			ItemStack var5 = var4.getStack();
+			if(var5.getItem() == Chesty.chestyRod)
+				return null;
+			
 			var3 = var5.copy();
 			boolean canSortInventory = true;
 			if(slot > EntityChesty.SPECIAL_SLOTS_SIZE-1) {
