@@ -94,17 +94,14 @@ public class Chesty {
 		
 		NetworkRegistry.instance().registerGuiHandler(this, proxy);
 		
-		EntityRegistry.registerModEntity(EntityChesty.class, "Chesty", chestyNpcId, this, 80, 3, true);
-		//EntityRegistry.addSpawn(EntityMiniMe.class, 100, 1, 6, EnumCreatureType.creature, BiomeGenBase.beach, BiomeGenBase.forest, BiomeGenBase.plains, BiomeGenBase.jungle);
+		EntityRegistry.registerModEntity(EntityChesty.class, "EntityChesty", chestyNpcId, this, 60, 3, true);
+		EntityList.addMapping(EntityChesty.class, "EntityChesty", chestyNpcId); //Not sure if I should do this.
 		
 		LanguageRegistry.instance().addStringLocalization("item.chestySceptre.name", "Sceptre of Chests");
 		
-		LanguageRegistry.instance().addStringLocalization("entity.Chesty.Chesty.name", "Chesty");
-		LanguageRegistry.instance().addStringLocalization("entity.Chesty.Chesty.inventory_description", "Chesty's Inventory");
-		LanguageRegistry.instance().addStringLocalization("entity.Chesty.Chesty.not_yours", "This Chesty does not belong to you.");
-		
-		EntityList.IDtoClassMapping.put(chestyNpcId, EntityChesty.class);
-		EntityList.entityEggs.put(chestyNpcId, new EntityEggInfo(chestyNpcId, 0xFFFFFF, 0x000000));
+		LanguageRegistry.instance().addStringLocalization("entity.EntityChesty.name", "Chesty");
+		LanguageRegistry.instance().addStringLocalization("entity.EntityChesty.inventory.description", "Chesty's Inventory");
+		LanguageRegistry.instance().addStringLocalization("entity.EntityChesty.not_yours", "This Chesty does not belong to you.");
 	}
 	
 	public static void setLastInteract(EntityChesty chesty) {

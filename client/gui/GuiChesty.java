@@ -25,7 +25,7 @@ public class GuiChesty extends GuiContainer {
 	 */
 	@Override
 	protected void drawGuiContainerForegroundLayer(int par1, int par2) {
-		fontRenderer.drawString(StatCollector.translateToLocal("entity.Chesty.Chesty.inventory_description"), 8, 6, 4210752);
+		fontRenderer.drawString(StatCollector.translateToLocal("entity.EntityChesty.inventory.description"), 8, 6, 4210752);
 		fontRenderer.drawString(StatCollector.translateToLocal("container.inventory"), 8, this.ySize - 96 + 2, 4210752);
 	}
 

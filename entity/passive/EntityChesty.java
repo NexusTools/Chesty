@@ -9,6 +9,7 @@ import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityAIFollowOwner;
 import net.minecraft.entity.ai.EntityAIHurtByTarget;
+import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import net.minecraft.entity.ai.EntityAIOwnerHurtByTarget;
 import net.minecraft.entity.ai.EntityAIOwnerHurtTarget;
 import net.minecraft.entity.ai.EntityAISwimming;
@@ -53,10 +54,7 @@ public class EntityChesty extends EntityTameable implements IInventory {
 		tasks.addTask(1, new EntityAIFollowOwner(this, moveSpeed, 4, 6));
 		tasks.addTask(2, new EntityAIWatchClosest(this, EntityPlayer.class, 24.0F));
 		tasks.addTask(3, new EntityAIWanderWhenChestClosed(this, moveSpeed));
-		targetTasks.addTask(1, new EntityAIOwnerHurtByTarget(this));
-		targetTasks.addTask(2, new EntityAIOwnerHurtTarget(this));
-		targetTasks.addTask(3, new EntityAIHurtByTarget(this, true));
-		inventoryTitle = "entity.Chesty.Chesty.inventory_description";
+		inventoryTitle = "entity.EntityChesty.inventory.description";
 		slotsCount = SPECIAL_SLOTS_SIZE+DEFAULT_ACTUAL_INVENTORY_SIZE;
 		inventoryContents = new ItemStack[slotsCount+1];
 	}
@@ -144,7 +142,7 @@ public class EntityChesty extends EntityTameable implements IInventory {
 			if(isTamed() && getOwnerName().equals(par1EntityPlayer.username)) {
 				par1EntityPlayer.openGui(Chesty.instance(), 0, worldObj, (int) posX, (int) posY, (int) posZ);
 			} else {
-				par1EntityPlayer.sendChatToPlayer(par1EntityPlayer.getTranslator().translateKey("entity.Chesty.Chesty.not_yours"));
+				par1EntityPlayer.sendChatToPlayer(par1EntityPlayer.getTranslator().translateKey("entity.EntityChesty.not_yours"));
 				return false;
 			}
 			return true;
@@ -164,31 +162,6 @@ public class EntityChesty extends EntityTameable implements IInventory {
 	@Override
 	public int getMaxHealth() {
 		return 20;
-	}
-
-	public int getAttackStrength(Entity entity) {
-		return 4;
-	}
-
-	@Override
-	public boolean attackEntityFrom(DamageSource damageSource, int damage) {
-		if(isEntityInvulnerable()) {
-			return false;
-		} else {
-			Entity damageSourceEntity = damageSource.getEntity();
-			aiSit.setSitting(false);
-
-			if(damageSourceEntity != null && !(damageSourceEntity instanceof EntityPlayer) && !(damageSourceEntity instanceof EntityArrow)) {
-				damage = (damage + 1) / 2;
-			}
-
-			return super.attackEntityFrom(damageSource, damage);
-		}
-	}
-
-	@Override
-	public boolean attackEntityAsMob(Entity entity) {
-		return entity.attackEntityFrom(DamageSource.causeMobDamage(this), getAttackStrength(entity));
 	}
 
 	@Override
