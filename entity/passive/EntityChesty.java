@@ -1,5 +1,7 @@
 package net.nexustools.chesty.entity.passive;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import net.minecraft.entity.Entity;
@@ -25,6 +27,7 @@ import net.minecraft.world.World;
 import net.nexustools.chesty.Chesty;
 import net.nexustools.chesty.entity.ai.EntityAIWanderWhenChestClosed;
 import net.nexustools.chesty.inventory.ContainerChesty;
+import net.nexustools.chesty.item.ItemChestySceptre;
 
 public class EntityChesty extends EntityTameable implements IInventory {
 	public static final int SPECIAL_SLOTS_SIZE = 6;
@@ -309,6 +312,10 @@ public class EntityChesty extends EntityTameable implements IInventory {
 	public void onInventoryChanged() {
 		if(chestySceptre != null && !worldObj.isRemote && getOwner() != null && getOwner() instanceof EntityPlayer) {
 			ItemStack actualRod = findChestySceptreOnPlayer((EntityPlayer)getOwner(), chestySceptre);
+			if(actualRod == null) {
+				setDead();
+				return;
+			}
 			NBTTagList var2 = new NBTTagList();
 			for(int var3 = 0; var3 < getSizeInventory(); ++var3) {
 				if(getStackInSlot(var3) != null) {
@@ -342,11 +349,15 @@ public class EntityChesty extends EntityTameable implements IInventory {
 		--numUsingPlayers;
 	}
 	
-	public static ItemStack findChestySceptreOnPlayer(EntityPlayer player, ItemStack chestyRod) {
-		for(ItemStack mainInventoryItem : player.inventory.mainInventory) {
+	public static ItemStack findChestySceptreOnPlayer(EntityPlayer player, ItemStack chestySceptre) {
+		if(player == null || chestySceptre == null || !(chestySceptre.getItem() instanceof ItemChestySceptre) || chestySceptre.getTagCompound() == null)
+			return null;
+		ArrayList<ItemStack> items = new ArrayList<ItemStack>(Arrays.asList(player.inventory.mainInventory));
+		items.add(player.inventory.getItemStack());
+		for(ItemStack mainInventoryItem : items) {
 			if(mainInventoryItem == null || !mainInventoryItem.hasTagCompound())
 				continue;
-			if(chestyRod.getTagCompound().getInteger("ChestyEntity") == mainInventoryItem.getTagCompound().getInteger("ChestyEntity")) {
+			if(chestySceptre.getTagCompound().getInteger("ChestyEntity") == mainInventoryItem.getTagCompound().getInteger("ChestyEntity")) {
 				return mainInventoryItem;
 			}
 		}

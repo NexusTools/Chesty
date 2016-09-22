@@ -2,16 +2,15 @@ package net.nexustools.chesty.inventory;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.nexustools.chesty.entity.passive.EntityChesty;
 
-public class SlotChestyArmor extends Slot {
+public class SlotChestyArmor extends SlotChesty {
 
 	final int armorType;
 	
-	public SlotChestyArmor(IInventory par2IInventory, int par3, int par4, int par5, int par6) {
+	public SlotChestyArmor(EntityChesty par2IInventory, int par3, int par4, int par5, int par6) {
 		super(par2IInventory, par3, par4, par5);
 		this.armorType = par6;
 	}
