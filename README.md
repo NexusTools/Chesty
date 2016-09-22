@@ -15,3 +15,4 @@ Chesty is simply a fully functioning chest with additional features that will lo
 * Ability to armor Chesty
 * Potential chest upgrades based on the IronChests, which could be increase size and the base armor of Chesty.
 * Potentially a way to have Chesty help defend. Or maybe once Chesty's owner dies he becomes rabid and begins killing everything.
+* Potentially let you right click on a chest with the Sceptre of Chests to automatically clone that one into a Chesty.

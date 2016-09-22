@@ -8,10 +8,14 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.EntityRegistry;
+import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import net.minecraft.entity.EntityEggInfo;
 import net.minecraft.entity.EntityList;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.WeightedRandomChestContent;
+import net.minecraftforge.common.ChestGenHooks;
 import net.minecraftforge.common.Configuration;
 import net.nexustools.chesty.entity.passive.EntityChesty;
 import net.nexustools.chesty.item.ItemChestySceptre;
@@ -21,8 +25,16 @@ import net.nexustools.chesty.proxy.Proxy;
 @NetworkMod(clientSideRequired = true)
 public class Chesty {
 	public static String version;
+	
 	public static int chestyNpcId;
 	public static int chestySceptreId;
+	
+	private static boolean spawnChestySceptreInDungeons;
+	private static int chestySceptreSpawnChanceMin;
+	private static int chestySceptreSpawnChanceMax;
+	private static int chestySceptreSpawnWeight;
+	
+	private static boolean allowCraftingChestySceptre;
 	
 	public static Item chestySceptre;
 	
@@ -39,7 +51,13 @@ public class Chesty {
 		version = FMLCommonHandler.instance().findContainerFor(this).getVersion(); //Is there a better way to obtain our mod's version without duplicate version variables?
 		Configuration conf = new Configuration(iEvent.getSuggestedConfigurationFile());
 		conf.load();
-		chestyNpcId = conf.get(Configuration.CATEGORY_GENERAL, "chestyNpcId", EntityRegistry.findGlobalUniqueEntityId()).getInt();
+		chestyNpcId = conf.get(Configuration.CATEGORY_GENERAL, "chestyNpcId", EntityRegistry.findGlobalUniqueEntityId(), "The NPC Id for Chesty. Shouldn't have to change, but it's available if needed.").getInt();
+		allowCraftingChestySceptre = conf.get(Configuration.CATEGORY_GENERAL, "allowCraftingChestySceptre", false, "If ture, adds a crafting recipe for the Sceptre of Chests.").getBoolean(false);
+		
+		spawnChestySceptreInDungeons = conf.get(Configuration.CATEGORY_GENERAL, "spawnChestySceptreInDungeons", true, "If ture, adds the Sceptre of Chests to dungeon chests.").getBoolean(true);
+		chestySceptreSpawnChanceMin = conf.get(Configuration.CATEGORY_GENERAL, "chestySceptreSpawnChanceMin", 1, "The minmium chance in percentage to spawn the Sceptre of Chests in dungeon chests.").getInt();
+		chestySceptreSpawnChanceMax = conf.get(Configuration.CATEGORY_GENERAL, "chestySceptreSpawnChanceMax", 1, "The maximum chance in percentage to spawn the Sceptre of Chests in dungeon chests.").getInt();
+		chestySceptreSpawnWeight = conf.get(Configuration.CATEGORY_GENERAL, "chestySceptreSpawnWeight", 70, "The overall spawn rarity weight to spawn the Sceptre of Chests in dungeon chests.").getInt();
 		chestySceptreId = conf.getItem("chestySceptreId", 16480).getInt();
 		
 		conf.save();
@@ -51,6 +69,28 @@ public class Chesty {
 			proxy.loadRenderers();
 		}
 		chestySceptre = new ItemChestySceptre(chestySceptreId);
+		
+		if(allowCraftingChestySceptre) {
+			GameRegistry.addRecipe(
+				new ItemStack(chestySceptre),
+				new Object[] { //S = Stick G = Gold Ingot E = Emerald O = Eye of Ender
+					"XGO",
+					"ESG",
+					"SEX",
+					'S',
+					Item.stick,
+					'G',
+					Item.ingotGold,
+					'E',
+					Item.emerald,
+					'O',
+					Item.eyeOfEnder
+				}
+			);
+		}
+		if(spawnChestySceptreInDungeons) {
+			ChestGenHooks.getInfo(ChestGenHooks.DUNGEON_CHEST).addItem(new WeightedRandomChestContent(new ItemStack(chestySceptre), chestySceptreSpawnChanceMin, chestySceptreSpawnChanceMax, chestySceptreSpawnWeight));
+		}
 		
 		NetworkRegistry.instance().registerGuiHandler(this, proxy);
 		
