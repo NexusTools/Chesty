@@ -7,6 +7,7 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ICrafting;
 import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.nexustools.chesty.Chesty;
 import net.nexustools.chesty.entity.passive.EntityChesty;
@@ -18,8 +19,8 @@ public class ContainerChesty extends Container {
 	public ContainerChesty(InventoryPlayer inventoryPlayer, EntityChesty chesty) {
 		this.chesty = chesty;
 		chesty.openChest();
-		this.addSlotToContainer(new Slot(chesty, 0, 8, 18));
-		this.addSlotToContainer(new Slot(chesty, 1, 26, 18));
+		this.addSlotToContainer(new SlotChestyFood(chesty, 0, 8, 18));
+		this.addSlotToContainer(new SlotChestyFood(chesty, 1, 26, 18));
 		for(int i = 0; i < 4; i++) {
 			this.addSlotToContainer(new SlotChestyArmor(chesty, 2+i, 98+(i*18), 18, i));
 		}
@@ -101,8 +102,8 @@ public class ContainerChesty extends Container {
 						break;
 					}
 				}
-				if(var5.getItem().isItemTool(var5)) {
-					canSortInventory = !this.mergeItemStack(var5, 0, 1, false);
+				if(var5.getItem() instanceof ItemFood) {
+					canSortInventory = !this.mergeItemStack(var5, 0, 2, false);
 					if(!canSortInventory)
 						var4.putStack((ItemStack) null);
 				}
