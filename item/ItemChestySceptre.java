@@ -93,7 +93,7 @@ public class ItemChestySceptre extends Item {
 	@SideOnly(Side.CLIENT)
 	@Override
 	public boolean hasEffect(ItemStack par1ItemStack) {
-		return par1ItemStack.getTagCompound().hasKey("ChestyEntity");
+		return par1ItemStack.hasTagCompound() && par1ItemStack.getTagCompound().hasKey("ChestyEntity");
 	}
 
 	/**
@@ -115,6 +115,7 @@ public class ItemChestySceptre extends Item {
 			Entity chesty;
 			if((chesty = player.worldObj.getEntityByID(item.getTagCompound().getInteger("ChestyEntity"))) != null && chesty instanceof EntityChesty && item.getTagCompound().getString("ChestyOwner").equals(player.username)) {
 				chesty.setDead();
+				item.getTagCompound().removeTag("ChestyEntity");
 			}
 		}
 		return true;
