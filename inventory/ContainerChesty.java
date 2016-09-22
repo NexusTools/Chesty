@@ -71,7 +71,7 @@ public class ContainerChesty extends Container {
 	public ItemStack slotClick(int par1, int par2, int par3, EntityPlayer par4EntityPlayer) {
 		if(par1 >= 0) { //Prevents you from trying to click on the Chesty Rods. Currently how I'm preventing them from storing them inside Chesty. Need a better way though.
 			Slot s = (Slot)this.inventorySlots.get(par1);
-			if(s != null && s.getStack() != null && s.getStack().getItem() == Chesty.chestyRod) {
+			if(s != null && s.getStack() != null && s.getStack().getItem() == Chesty.chestySceptre) {
 				return null;
 			}
 		}
@@ -87,7 +87,7 @@ public class ContainerChesty extends Container {
 		Slot var4 = (Slot) this.inventorySlots.get(slot);
 		if(var4 != null && var4.getHasStack()) {
 			ItemStack var5 = var4.getStack();
-			if(var5.getItem() == Chesty.chestyRod)
+			if(var5.getItem() == Chesty.chestySceptre)
 				return null;
 			
 			var3 = var5.copy();

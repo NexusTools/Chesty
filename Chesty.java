@@ -9,23 +9,22 @@ import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityEggInfo;
 import net.minecraft.entity.EntityList;
 import net.minecraft.item.Item;
 import net.minecraftforge.common.Configuration;
 import net.nexustools.chesty.entity.passive.EntityChesty;
-import net.nexustools.chesty.item.ChestyRod;
+import net.nexustools.chesty.item.ItemChestySceptre;
 import net.nexustools.chesty.proxy.Proxy;
 
-@Mod(modid = "Chesty", name = "Chesty", version = "0.1")
+@Mod(modid = "Chesty", name = "Chesty", version = "0.2")
 @NetworkMod(clientSideRequired = true)
 public class Chesty {
 	public static String version;
 	public static int chestyNpcId;
-	public static int chestyRodId;
+	public static int chestySceptreId;
 	
-	public static Item chestyRod;
+	public static Item chestySceptre;
 	
 	@SidedProxy(clientSide = "net.nexustools.chesty.proxy.ClientProxy", serverSide = "net.nexustools.chesty.proxy.Proxy")
 	public static Proxy proxy;
@@ -41,7 +40,7 @@ public class Chesty {
 		Configuration conf = new Configuration(iEvent.getSuggestedConfigurationFile());
 		conf.load();
 		chestyNpcId = conf.get(Configuration.CATEGORY_GENERAL, "chestyNpcId", EntityRegistry.findGlobalUniqueEntityId()).getInt();
-		chestyRodId = conf.getItem("chestyRodId", 16480).getInt();
+		chestySceptreId = conf.getItem("chestySceptreId", 16480).getInt();
 		
 		conf.save();
 	}
@@ -51,14 +50,14 @@ public class Chesty {
 		if(FMLCommonHandler.instance().getSide().isClient()) {
 			proxy.loadRenderers();
 		}
-		chestyRod = new ChestyRod(chestyRodId).setIconCoord(5, 3);
+		chestySceptre = new ItemChestySceptre(chestySceptreId);
 		
 		NetworkRegistry.instance().registerGuiHandler(this, proxy);
 		
 		EntityRegistry.registerModEntity(EntityChesty.class, "Chesty", chestyNpcId, this, 80, 3, true);
 		//EntityRegistry.addSpawn(EntityMiniMe.class, 100, 1, 6, EnumCreatureType.creature, BiomeGenBase.beach, BiomeGenBase.forest, BiomeGenBase.plains, BiomeGenBase.jungle);
 		
-		LanguageRegistry.instance().addStringLocalization("item.chestyRod.name", "Chesty Rod");
+		LanguageRegistry.instance().addStringLocalization("item.chestySceptre.name", "Sceptre of Chests");
 		
 		LanguageRegistry.instance().addStringLocalization("entity.Chesty.Chesty.name", "Chesty");
 		LanguageRegistry.instance().addStringLocalization("entity.Chesty.Chesty.inventory_description", "Chesty's Inventory");

@@ -36,9 +36,9 @@ public class EntityChesty extends EntityTameable implements IInventory {
 	public ItemStack[] inventoryContents;
 	public float prevLidAngle = 0;
 	public float lidAngle = 0;
-	public int ticksSinceSync = 0;
+	public int ticksSinceSync = 59;
 	public int numUsingPlayers = 0;
-	public ItemStack chestyRod;
+	public ItemStack chestySceptre;
 	public boolean spawnParticles = false;
 
 	public EntityChesty(World world) {
@@ -62,17 +62,17 @@ public class EntityChesty extends EntityTameable implements IInventory {
 	public void onUpdate() {
 		super.onUpdate();
 		if(!worldObj.isRemote && ++ticksSinceSync % 60 == 0) {
-			if(chestyRod == null || getOwner() == null || getOwner().worldObj != worldObj || getOwner().dimension != dimension) {
+			if(chestySceptre == null || getOwner() == null || getOwner().worldObj != worldObj || getOwner().dimension != dimension) {
 				setDead();
-				if(chestyRod != null) {
-					chestyRod.getTagCompound().removeTag("ChestyEntity");
+				if(chestySceptre != null) {
+					chestySceptre.getTagCompound().removeTag("ChestyEntity");
 				}
 				return;
 			} else {
 				EntityPlayer owner = (EntityPlayer)getOwner();
-				if(findChestyRodOnPlayer(owner, chestyRod) == null) {
+				if(findChestySceptreOnPlayer(owner, chestySceptre) == null) {
 					setDead();
-					chestyRod.getTagCompound().removeTag("ChestyEntity");
+					chestySceptre.getTagCompound().removeTag("ChestyEntity");
 					return;
 				}
 			}
@@ -307,8 +307,8 @@ public class EntityChesty extends EntityTameable implements IInventory {
 	 */
 	@Override
 	public void onInventoryChanged() {
-		if(chestyRod != null && !worldObj.isRemote && getOwner() != null && getOwner() instanceof EntityPlayer) {
-			ItemStack actualRod = findChestyRodOnPlayer((EntityPlayer)getOwner(), chestyRod);
+		if(chestySceptre != null && !worldObj.isRemote && getOwner() != null && getOwner() instanceof EntityPlayer) {
+			ItemStack actualRod = findChestySceptreOnPlayer((EntityPlayer)getOwner(), chestySceptre);
 			NBTTagList var2 = new NBTTagList();
 			for(int var3 = 0; var3 < getSizeInventory(); ++var3) {
 				if(getStackInSlot(var3) != null) {
@@ -342,7 +342,7 @@ public class EntityChesty extends EntityTameable implements IInventory {
 		--numUsingPlayers;
 	}
 	
-	public static ItemStack findChestyRodOnPlayer(EntityPlayer player, ItemStack chestyRod) {
+	public static ItemStack findChestySceptreOnPlayer(EntityPlayer player, ItemStack chestyRod) {
 		for(ItemStack mainInventoryItem : player.inventory.mainInventory) {
 			if(mainInventoryItem == null || !mainInventoryItem.hasTagCompound())
 				continue;
