@@ -2,7 +2,6 @@
 
 Chesty is simply a fully functioning chest with additional features that will loyally follow you around to the end of the world, always providing you portable storage.
 
-
 [![Chesty Mod 0.1 Example Video](https://img.youtube.com/vi/63oHPirTwLk/0.jpg)](https://www.youtube.com/watch?v=63oHPirTwLk)
 
 ### Currently Working Content
@@ -12,7 +11,7 @@ Chesty is simply a fully functioning chest with additional features that will lo
 
 ### Planned/Potential Content
 * A slot for food in Chesty to allow Chesty to heal himself.
-* Ability to armor Chesty
+* Ability to armor Chesty?
 * Potential chest upgrades based on the IronChests, which could be increase size and the base armor of Chesty.
 * Potentially a way to have Chesty help defend. Or maybe once Chesty's owner dies he becomes rabid and begins killing everything.
 * Potentially let you right click on a chest with the Sceptre of Chests to automatically clone that one into a Chesty.

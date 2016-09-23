@@ -1,0 +1,17 @@
+[
+{
+  "modid": "Chesty",
+  "name": "Chesty",
+  "description": "A mod for 1.4.7 minecraft that adds a NPC that will follow you around and store some items. In development and not all features are available.",
+  "version": "0.2",
+  "mcversion": "1.4.7",
+  "logoFile": "",
+  "url": "https://github.com/NexusTools/Chesty",
+  "updateUrl": "",
+  "authors": ["Steve4448"],
+  "credits": "By Steve4448. Thanks to Aerospark12 and ktae for the love.",
+  "parent": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
