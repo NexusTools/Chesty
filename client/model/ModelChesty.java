@@ -18,6 +18,7 @@ public class ModelChesty extends ModelBase {
 	public final ModelRenderer chestyLegFrontRight;
 	public final ModelRenderer chestyLegBackLeft;
 	public final ModelRenderer chestyLegBackRight;
+	public float lastBreathRotateX;
 
 	public ModelChesty() {
 		textureWidth = 64;
@@ -88,7 +89,7 @@ public class ModelChesty extends ModelBase {
         this.chestyLegBackRight.rotateAngleX = MathHelper.cos(par1 * 0.9992F) * 1.4F * par2;
 		
 		EntityChesty chesty = (EntityChesty)par7Entity;
-		chestyLid.rotateAngleX = -(chesty.lidAngle * (float)Math.PI / 2.0F); //TODO: find out how to smooth the animation more?
+		lastBreathRotateX = chesty.lidAngle != 0 ? lastBreathRotateX : -Math.abs(MathHelper.cos(par3 * 0.1994F) * 0.2F);
 		chestyLock.rotateAngleX = chestyLid.rotateAngleX;
 	}
 }
