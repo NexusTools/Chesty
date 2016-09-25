@@ -142,7 +142,7 @@ public class EntityChesty extends EntityTameable implements IInventory {
 		super.interact(par1EntityPlayer);
 		if(isTamed() && getOwnerName().equals(par1EntityPlayer.username) && findChestySceptreOnPlayer(par1EntityPlayer, this) != null) {
 			ItemStack chestyRod = findChestySceptreOnPlayer(par1EntityPlayer, this);
-			if(Chesty.ironChestExists && par1EntityPlayer.getCurrentEquippedItem() != null && (par1EntityPlayer.getCurrentEquippedItem().getItem() == IronChestSupport.ironChestItem || par1EntityPlayer.getCurrentEquippedItem().getItem().itemID == Block.chest.blockID)) {
+			if(IronChestSupport.isIronChestSupported() && par1EntityPlayer.getCurrentEquippedItem() != null && (par1EntityPlayer.getCurrentEquippedItem().getItem() == IronChestSupport.ironChestItem || par1EntityPlayer.getCurrentEquippedItem().getItem().itemID == Block.chest.blockID)) {
 				if(par1EntityPlayer.getCurrentEquippedItem().getItem().itemID == Block.chest.blockID && chestyRod.getTagCompound().hasKey("ChestyIronChestSubType")) {
 					if(containsItems()) {
 						if(!par1EntityPlayer.worldObj.isRemote) {
@@ -197,7 +197,7 @@ public class EntityChesty extends EntityTameable implements IInventory {
 				player.openContainer = new ContainerChesty(player.inventory, this);
 				player.openContainer.windowId = player.currentWindowId;
 				player.openContainer.addCraftingToCrafters(player);
-			} else if(Chesty.ironChestExists && chestyRod.getTagCompound().hasKey("ChestyIronChestSubType")) {
+			} else if(IronChestSupport.isIronChestSupported() && chestyRod.getTagCompound().hasKey("ChestyIronChestSubType")) {
 				//TODO: Find a better way to sync client-side inventory size.
 				IronChestEntry entry = IronChestSupport.getIronChestEntry(chestyRod.getTagCompound().getInteger("ChestyIronChestSubType"));
 				slotsCount = (EntityChesty.SPECIAL_SLOTS_SIZE + entry.size - (entry.rowLength * 3));
@@ -367,7 +367,7 @@ public class EntityChesty extends EntityTameable implements IInventory {
 
 	@Override
 	public String getTexture() {
-		if(Chesty.ironChestExists) {
+		if(IronChestSupport.isIronChestSupported()) {
 			int subType = dataWatcher.getWatchableObjectByte(DATA_WATCHER_SUBTYPE);
 			if(subType > 0) {
 				IronChestEntry entry = IronChestSupport.getIronChestEntry(subType - 1);

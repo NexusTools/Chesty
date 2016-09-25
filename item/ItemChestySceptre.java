@@ -76,7 +76,7 @@ public class ItemChestySceptre extends Item {
 				entityChesty.setTamed(true);
 				entityChesty.setOwner(player.username);
 				
-				if(Chesty.ironChestExists && itemStack.getTagCompound().hasKey("ChestyIronChestSubType")) {
+				if(IronChestSupport.isIronChestSupported() && itemStack.getTagCompound().hasKey("ChestyIronChestSubType")) {
 					entityChesty.getDataWatcher().updateObject(EntityChesty.DATA_WATCHER_SUBTYPE, new Byte((byte)(itemStack.getTagCompound().getInteger("ChestyIronChestSubType")+1)));
 					IronChestEntry entry = IronChestSupport.getIronChestEntry(itemStack.getTagCompound().getInteger("ChestyIronChestSubType"));
 					entityChesty.slotsCount = (EntityChesty.SPECIAL_SLOTS_SIZE + entry.size - (entry.rowLength*3));

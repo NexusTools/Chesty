@@ -7,11 +7,10 @@ import java.io.IOException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.Packet250CustomPayload;
-import net.nexustools.chesty.Chesty;
 
 public abstract class PacketChestyBase {
 
-	protected String channel = Chesty.PACKET_CHANNEL_NAME;
+	protected String channel = PacketHandler.PACKET_CHANNEL_NAME;
 
 	public abstract int getID();
 

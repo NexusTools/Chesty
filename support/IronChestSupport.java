@@ -68,4 +68,8 @@ public class IronChestSupport {
 		}
 		return null;
 	}
+	
+	public static boolean isIronChestSupported() {
+		return Chesty.ironChestExists && Chesty.ironChestSupportForcedEnabled && (Chesty.ironChestSupportEnabled || Chesty.ironChestSupportForcedEnabled);
+	}
 }

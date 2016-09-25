@@ -26,7 +26,7 @@ public class PacketChestyOpen extends PacketChestyBase {
 
 	@Override
 	public int getID() {
-		return Chesty.PACKET_OPEN_CHEST;
+		return PacketHandler.PACKET_OPEN_CHEST;
 	}
 
 	@Override

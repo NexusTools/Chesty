@@ -7,7 +7,9 @@ import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.network.IConnectionHandler;
 import cpw.mods.fml.common.network.NetworkMod;
+import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
@@ -20,12 +22,13 @@ import net.minecraftforge.common.ChestGenHooks;
 import net.minecraftforge.common.Configuration;
 import net.nexustools.chesty.entity.passive.EntityChesty;
 import net.nexustools.chesty.item.ItemChestySceptre;
+import net.nexustools.chesty.network.ConnectionHandlerChesty;
 import net.nexustools.chesty.proxy.Proxy;
 import net.nexustools.chesty.support.IronChestSupport;
 import net.nexustools.chesty.network.PacketHandler;
 
 @Mod(modid = "Chesty", name = "Chesty", dependencies = "after:IronChest")
-@NetworkMod(clientSideRequired = true, channels = Chesty.PACKET_CHANNEL_NAME, packetHandler = PacketHandler.class)
+@NetworkMod(clientSideRequired = true, channels = PacketHandler.PACKET_CHANNEL_NAME, packetHandler = PacketHandler.class)
 public class Chesty {
 	@Mod.Instance("Chesty")
 	public static Chesty instance;
@@ -43,6 +46,7 @@ public class Chesty {
 	private static boolean allowCraftingChestySceptre;
 	
 	public static boolean ironChestSupportEnabled;
+	public static boolean ironChestSupportForcedEnabled;
 	public static boolean ironChestExists;
 	
 	public static Item chestySceptre;
@@ -51,9 +55,6 @@ public class Chesty {
 	public static Proxy proxy;
 	
 	private static final Logger CHESTY_LOGGER = Logger.getLogger("Chesty");
-	
-	public static final String PACKET_CHANNEL_NAME = "NX|Chesty";
-	public static final int PACKET_OPEN_CHEST = 0;
 	
 	@Mod.PreInit
 	public void preload(FMLPreInitializationEvent iEvent) {
@@ -72,7 +73,7 @@ public class Chesty {
 		chestySceptreSpawnChanceMax = conf.get(Configuration.CATEGORY_GENERAL, "chestySceptreSpawnChanceMax", 1, "The maximum chance in percentage to spawn the Sceptre of Chests in dungeon chests.").getInt();
 		chestySceptreSpawnWeight = conf.get(Configuration.CATEGORY_GENERAL, "chestySceptreSpawnWeight", 70, "The overall spawn rarity weight to spawn the Sceptre of Chests in dungeon chests.").getInt();
 		
-		ironChestSupportEnabled = conf.get(Configuration.CATEGORY_GENERAL, "ironChestSupportEnabled", true, "If ture, and you have a compitable version of IronChest installed, you will be able to upgrade Chesty with different chests from the IronChest mod.").getBoolean(true);
+		ironChestSupportForcedEnabled = ironChestSupportEnabled = conf.get(Configuration.CATEGORY_GENERAL, "ironChestSupportEnabled", true, "If ture, and you have a compitable version of IronChest installed, you will be able to upgrade Chesty with different chests from the IronChest mod. Warning: Disabling this can result in loss of items in previous Chesty saves.").getBoolean(true);
 		
 		chestySceptreId = conf.getItem("chestySceptreId", 16480).getInt();
 		
@@ -81,7 +82,8 @@ public class Chesty {
 	
 	@Mod.Init
 	public void load(FMLInitializationEvent IEvent) {
-		if(ironChestSupportEnabled && !(ironChestExists = Loader.isModLoaded("IronChest"))) {
+		ironChestExists = Loader.isModLoaded("IronChest");
+		if(ironChestSupportEnabled && !ironChestExists) {
 			CHESTY_LOGGER.info("IronChest support was enabled but IronChest does not appear to be installed. Continuing happily.");
 		} else if(ironChestExists) {
 			IronChestSupport.init();
@@ -115,6 +117,8 @@ public class Chesty {
 		if(spawnChestySceptreInDungeons) {
 			ChestGenHooks.getInfo(ChestGenHooks.DUNGEON_CHEST).addItem(new WeightedRandomChestContent(new ItemStack(chestySceptre), chestySceptreSpawnChanceMin, chestySceptreSpawnChanceMax, chestySceptreSpawnWeight));
 		}
+		
+		NetworkRegistry.instance().registerConnectionHandler((IConnectionHandler)new ConnectionHandlerChesty());
 		
 		EntityRegistry.registerModEntity(EntityChesty.class, "EntityChesty", chestyNpcId, this, 60, 3, true);
 		EntityList.addMapping(EntityChesty.class, "EntityChesty", chestyNpcId); //Not sure if I should do this.
