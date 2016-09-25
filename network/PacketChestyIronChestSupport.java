@@ -18,13 +18,13 @@ public class PacketChestyIronChestSupport extends PacketChestyBase {
 	@Override
 	public void readData(EntityPlayer player, DataInputStream data) throws IOException {
 		//TODO: This might cause problems if the packet can be received after entities are received.
-		Chesty.ironChestSupportForcedEnabled = data.readBoolean();
-		if(Chesty.ironChestSupportEnabled && !Chesty.ironChestSupportForcedEnabled) {
+		IronChestSupport.ironChestSupportForcedEnabled = data.readBoolean();
+		if(IronChestSupport.ironChestSupportEnabled && !IronChestSupport.ironChestSupportForcedEnabled) {
 			Chesty.getLogger().info("This server does not have IronChest support enabled.");
 		}
-		if(Chesty.ironChestSupportForcedEnabled && !Chesty.ironChestSupportEnabled) {
+		if(IronChestSupport.ironChestSupportForcedEnabled && !IronChestSupport.ironChestSupportEnabled) {
 			Chesty.getLogger().info("Server has IronChest support enabled. Forcing enable.");
-			IronChestSupport.init();
+			IronChestSupport.load();
 			if(IronChestSupport.ironChestEntries == null) {
 				FMLClientHandler.instance().haltGame("IronChestSupport failed to load. Support is required to connect to this server.", new Throwable("IronChestSupport failed to load."));
 			}
@@ -33,6 +33,6 @@ public class PacketChestyIronChestSupport extends PacketChestyBase {
 
 	@Override
 	public void writeData(DataOutputStream data) throws IOException {
-		data.writeBoolean(Chesty.ironChestExists && Chesty.ironChestSupportEnabled);
+		data.writeBoolean(IronChestSupport.ironChestExists && IronChestSupport.ironChestSupportEnabled);
 	}
 }
