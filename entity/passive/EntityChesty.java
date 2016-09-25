@@ -161,35 +161,36 @@ public class EntityChesty extends EntityTameable implements IInventory {
 					if(!par1EntityPlayer.capabilities.isCreativeMode && --par1EntityPlayer.getCurrentEquippedItem().stackSize <= 0) {
 						par1EntityPlayer.inventory.setInventorySlotContents(par1EntityPlayer.inventory.currentItem, (ItemStack) null);
 					}
+					return true;
 				} else if(par1EntityPlayer.getCurrentEquippedItem().getItem() == IronChestSupport.ironChestItem) {
 					IronChestEntry entry = IronChestSupport.getIronChestEntry(par1EntityPlayer.getCurrentEquippedItem().getItemDamage());
 					if(entry == null) {
 						Chesty.getLogger().log(Level.WARNING, "IronChestEntry was somehow null when interacting with Chesty. This is a possible problem with IronChest support and should be further investigated!");
 						return false;
 					}
-					if(chestyRod.getTagCompound().hasKey("ChestyIronChestSubType") && chestyRod.getTagCompound().getInteger("ChestyIronChestSubType") == entry.subType) {
-						return false;
-					}
-
-					if(containsItems()) {
-						if(!par1EntityPlayer.worldObj.isRemote) {
-							par1EntityPlayer.sendChatToPlayer(par1EntityPlayer.getTranslator().translateKey("entity.EntityChesty.please_empty"));
+					if(!chestyRod.getTagCompound().hasKey("ChestyIronChestSubType") || chestyRod.getTagCompound().getInteger("ChestyIronChestSubType") != entry.subType) {
+						if(containsItems()) {
+							if(!par1EntityPlayer.worldObj.isRemote) {
+								par1EntityPlayer.sendChatToPlayer(par1EntityPlayer.getTranslator().translateKey("entity.EntityChesty.please_empty"));
+							}
+							return false;
 						}
-						return false;
-					}
 
-					slotsCount = (SPECIAL_SLOTS_SIZE + entry.size - (entry.rowLength * 3));
-					rowLength = entry.rowLength;
-					inventoryContents = new ItemStack[slotsCount + 1];
-					chestyRod.getTagCompound().setInteger("ChestyIronChestSubType", entry.subType);
-					dataWatcher.updateObject(DATA_WATCHER_SUBTYPE, new Byte((byte) (entry.subType + 1)));
-					updateMaxHealth();
-					
-					if(!par1EntityPlayer.capabilities.isCreativeMode && --par1EntityPlayer.getCurrentEquippedItem().stackSize <= 0) {
-						par1EntityPlayer.inventory.setInventorySlotContents(par1EntityPlayer.inventory.currentItem, (ItemStack) null);
+						slotsCount = (SPECIAL_SLOTS_SIZE + entry.size - (entry.rowLength * 3));
+						rowLength = entry.rowLength;
+						inventoryContents = new ItemStack[slotsCount + 1];
+						chestyRod.getTagCompound().setInteger("ChestyIronChestSubType", entry.subType);
+						dataWatcher.updateObject(DATA_WATCHER_SUBTYPE, new Byte((byte) (entry.subType + 1)));
+						updateMaxHealth();
+
+						if(!par1EntityPlayer.capabilities.isCreativeMode && --par1EntityPlayer.getCurrentEquippedItem().stackSize <= 0) {
+							par1EntityPlayer.inventory.setInventorySlotContents(par1EntityPlayer.inventory.currentItem, (ItemStack) null);
+						}
+						return true;
 					}
 				}
-			} else if(!par1EntityPlayer.worldObj.isRemote) {
+			}
+			if(!par1EntityPlayer.worldObj.isRemote) {
 				EntityPlayerMP player = (EntityPlayerMP) par1EntityPlayer;
 				player.closeInventory();
 				player.incrementWindowID();
