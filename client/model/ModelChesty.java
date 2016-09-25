@@ -29,7 +29,7 @@ public class ModelChesty extends ModelBase {
 		chestyBottom.setTextureSize(textureWidth, textureHeight);
 		setRotation(chestyBottom, 0F, 0F, 0F);
 		chestyLid = new ModelRenderer(this, 0, 0);
-		chestyLid.addBox(-7F, -4F, -14F, 14, 4, 14);
+		chestyLid.addBox(-7F, -3.99F, -14F, 14, 4, 14);
 		chestyLid.setRotationPoint(0F, 8F, 7F);
 		chestyLid.setTextureSize(textureWidth, textureHeight);
 		setRotation(chestyLid, 0F, 0F, 0F);

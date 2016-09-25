@@ -1,33 +1,14 @@
 package net.nexustools.chesty.proxy;
 
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.common.network.IGuiHandler;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.world.World;
-import net.nexustools.chesty.Chesty;
-import net.nexustools.chesty.inventory.ContainerChesty;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.nexustools.chesty.network.PacketChestyBase;
 
-public class Proxy implements IGuiHandler {
-
-	public Minecraft getClientInstance() {
-		return FMLClientHandler.instance().getClient();
-	}
-
-	@Override
-	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-		return null;
-	}
-
-	@Override
-	public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
-		if(Chesty.getLastInteractRemote() != null) {
-			switch(ID) {
-				case 0:
-					return new ContainerChesty(player.inventory, Chesty.getLastInteractRemote());
-			}
-		}
-		return null;
+public class Proxy {
+	
+	public void sendToPlayer(EntityPlayer entityplayer, PacketChestyBase packet) {
+		EntityPlayerMP player = (EntityPlayerMP) entityplayer;
+		player.playerNetServerHandler.sendPacketToPlayer(packet.getPacket());
 	}
 	
 	public void loadRenderers() {}

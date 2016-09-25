@@ -4,45 +4,49 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import net.minecraft.entity.Entity;
+import java.util.logging.Level;
+import net.minecraft.block.Block;
 import net.minecraft.entity.EntityAgeable;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityAIFollowOwner;
-import net.minecraft.entity.ai.EntityAIHurtByTarget;
-import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
-import net.minecraft.entity.ai.EntityAIOwnerHurtByTarget;
-import net.minecraft.entity.ai.EntityAIOwnerHurtTarget;
 import net.minecraft.entity.ai.EntityAISwimming;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.pathfinding.PathEntity;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import net.nexustools.chesty.Chesty;
 import net.nexustools.chesty.entity.ai.EntityAIWanderWhenChestClosed;
 import net.nexustools.chesty.inventory.ContainerChesty;
 import net.nexustools.chesty.item.ItemChestySceptre;
+import net.nexustools.chesty.network.PacketChestyOpen;
+import net.nexustools.chesty.support.IronChestEntry;
+import net.nexustools.chesty.support.IronChestSupport;
 
 public class EntityChesty extends EntityTameable implements IInventory {
+
 	public static final int SPECIAL_SLOTS_SIZE = 6;
 	public static final int DEFAULT_ACTUAL_INVENTORY_SIZE = 18;
+	public static final int DEFAULT_ROW_SIZE = 9;
+
+	public static final int DATA_WATCHER_SLOTS_COUNT = 18;
+	public static final int DATA_WATCHER_ROW_LENGTH = 19;
+	public static final int DATA_WATCHER_SUBTYPE = 20;
+
 	private int itemInUseCount;
 
 	public String inventoryTitle;
 	public int slotsCount;
+	public int rowLength;
 	public ItemStack[] inventoryContents;
 	public float prevLidAngle = 0;
 	public float lidAngle = 0;
 	public int ticksSinceSync = 59;
 	public int numUsingPlayers = 0;
-	public ItemStack chestySceptre;
 	public boolean spawnParticles = false;
 
 	public EntityChesty(World world) {
@@ -55,27 +59,34 @@ public class EntityChesty extends EntityTameable implements IInventory {
 		tasks.addTask(2, new EntityAIWatchClosest(this, EntityPlayer.class, 24.0F));
 		tasks.addTask(3, new EntityAIWanderWhenChestClosed(this, moveSpeed));
 		inventoryTitle = "entity.EntityChesty.inventory.description";
-		slotsCount = SPECIAL_SLOTS_SIZE+DEFAULT_ACTUAL_INVENTORY_SIZE;
-		inventoryContents = new ItemStack[slotsCount+1];
+		slotsCount = SPECIAL_SLOTS_SIZE + DEFAULT_ACTUAL_INVENTORY_SIZE;
+		rowLength = DEFAULT_ROW_SIZE;
+		inventoryContents = new ItemStack[slotsCount + 1];
+	}
+
+	@Override
+	protected void entityInit() {
+		super.entityInit();
+		this.dataWatcher.addObject(DATA_WATCHER_SUBTYPE, new Byte((byte) 0));
 	}
 
 	@Override
 	public void onUpdate() {
 		super.onUpdate();
 		if(!worldObj.isRemote && ++ticksSinceSync % 60 == 0) {
-			if(chestySceptre == null || getOwner() == null || getOwner().worldObj != worldObj || getOwner().dimension != dimension) {
+			if(getOwner() == null || !(getOwner() instanceof EntityPlayer)) {
 				setDead();
-				if(chestySceptre != null) {
-					chestySceptre.getTagCompound().removeTag("ChestyEntity");
-				}
 				return;
-			} else {
-				EntityPlayer owner = (EntityPlayer)getOwner();
-				if(findChestySceptreOnPlayer(owner, chestySceptre) == null) {
-					setDead();
-					chestySceptre.getTagCompound().removeTag("ChestyEntity");
-					return;
-				}
+			}
+			ItemStack chestySceptre = findChestySceptreOnPlayer((EntityPlayer) getOwner(), this);
+			if(chestySceptre == null) {
+				setDead();
+				return;
+			}
+			if(getOwner().worldObj != worldObj || getOwner().dimension != dimension) {
+				setDead();
+				chestySceptre.getTagCompound().removeTag("ChestyEntity");
+				return;
 			}
 			if(numUsingPlayers != 0) {
 				numUsingPlayers = 0;
@@ -134,18 +145,82 @@ public class EntityChesty extends EntityTameable implements IInventory {
 	@Override
 	public boolean interact(EntityPlayer par1EntityPlayer) {
 		super.interact(par1EntityPlayer);
-		if(worldObj.isRemote) {
-			Chesty.setLastInteract(this);
-			return true;
-		} else {
-			Chesty.setLastInteractRemote(this);
-			if(isTamed() && getOwnerName().equals(par1EntityPlayer.username)) {
-				par1EntityPlayer.openGui(Chesty.instance(), 0, worldObj, (int) posX, (int) posY, (int) posZ);
-			} else {
-				par1EntityPlayer.sendChatToPlayer(par1EntityPlayer.getTranslator().translateKey("entity.EntityChesty.not_yours"));
-				return false;
+		if(isTamed() && getOwnerName().equals(par1EntityPlayer.username) && findChestySceptreOnPlayer(par1EntityPlayer, this) != null) {
+			ItemStack chestyRod = findChestySceptreOnPlayer(par1EntityPlayer, this);
+			if(Chesty.ironChestExists && par1EntityPlayer.getCurrentEquippedItem() != null && (par1EntityPlayer.getCurrentEquippedItem().getItem() == IronChestSupport.ironChestItem || par1EntityPlayer.getCurrentEquippedItem().getItem().itemID == Block.chest.blockID)) {
+				if(par1EntityPlayer.getCurrentEquippedItem().getItem() == IronChestSupport.ironChestItem) {
+					IronChestEntry entry = IronChestSupport.getIronChestEntry(par1EntityPlayer.getCurrentEquippedItem().getItemDamage());
+					if(!chestyRod.getTagCompound().hasKey("ChestyIronChestSubType") || entry.subType != chestyRod.getTagCompound().getInteger("ChestyIronChestSubType")) {
+						boolean foundItem = false;
+						for(ItemStack s : inventoryContents) {
+							if(s != null) {
+								foundItem = true;
+								break;
+							}
+						}
+						if(foundItem) {
+							if(!par1EntityPlayer.worldObj.isRemote) {
+								par1EntityPlayer.sendChatToPlayer(par1EntityPlayer.getTranslator().translateKey("entity.EntityChesty.please_empty"));
+							}
+							return false;
+						}
+						if(entry == null) {
+							Chesty.getLogger().log(Level.WARNING, "IronChestEntry was somehow null when interacting with Chesty. This is a possible problem with IronChest support and should be further investigated!");
+						} else {
+							slotsCount = (SPECIAL_SLOTS_SIZE + entry.size - (entry.rowLength * 3));
+							rowLength = entry.rowLength;
+							inventoryContents = new ItemStack[slotsCount + 1];
+							chestyRod.getTagCompound().setInteger("ChestyIronChestSubType", entry.subType);
+							dataWatcher.updateObject(DATA_WATCHER_SUBTYPE, new Byte((byte) (entry.subType + 1)));
+							if(!par1EntityPlayer.capabilities.isCreativeMode && --par1EntityPlayer.getCurrentEquippedItem().stackSize <= 0) {
+								par1EntityPlayer.inventory.setInventorySlotContents(par1EntityPlayer.inventory.currentItem, (ItemStack) null);
+							}
+						}
+					}
+				} else if(chestyRod.getTagCompound().hasKey("ChestyIronChestSubType") && par1EntityPlayer.getCurrentEquippedItem().getItem().itemID == Block.chest.blockID) {
+					boolean foundItem = false;
+					for(ItemStack s : inventoryContents) {
+						if(s != null) {
+							foundItem = true;
+							break;
+						}
+					}
+					if(foundItem) {
+						if(!par1EntityPlayer.worldObj.isRemote) {
+							par1EntityPlayer.sendChatToPlayer(par1EntityPlayer.getTranslator().translateKey("entity.EntityChesty.please_empty"));
+						}
+						return false;
+					}
+					chestyRod.getTagCompound().removeTag("ChestyIronChestSubType");
+					slotsCount = SPECIAL_SLOTS_SIZE + DEFAULT_ACTUAL_INVENTORY_SIZE;
+					rowLength = DEFAULT_ROW_SIZE;
+					inventoryContents = new ItemStack[slotsCount + 1];
+					dataWatcher.updateObject(DATA_WATCHER_SUBTYPE, new Byte((byte) 0));
+
+					if(!par1EntityPlayer.capabilities.isCreativeMode && --par1EntityPlayer.getCurrentEquippedItem().stackSize <= 0) {
+						par1EntityPlayer.inventory.setInventorySlotContents(par1EntityPlayer.inventory.currentItem, (ItemStack) null);
+					}
+				}
+			} else if(!par1EntityPlayer.worldObj.isRemote) {
+				EntityPlayerMP player = (EntityPlayerMP) par1EntityPlayer;
+				player.closeInventory();
+				player.incrementWindowID();
+				Chesty.proxy.sendToPlayer(par1EntityPlayer, new PacketChestyOpen(entityId, player.currentWindowId));
+				player.openContainer = new ContainerChesty(player.inventory, this);
+				player.openContainer.windowId = player.currentWindowId;
+				player.openContainer.addCraftingToCrafters(player);
+			} else if(Chesty.ironChestExists && chestyRod.getTagCompound().hasKey("ChestyIronChestSubType")) {
+				IronChestEntry entry = IronChestSupport.getIronChestEntry(chestyRod.getTagCompound().getInteger("ChestyIronChestSubType"));
+				slotsCount = (EntityChesty.SPECIAL_SLOTS_SIZE + entry.size - (entry.rowLength * 3));
+				rowLength = entry.rowLength;
+				inventoryContents = new ItemStack[slotsCount + 1];
 			}
 			return true;
+		} else {
+			if(!par1EntityPlayer.worldObj.isRemote) {
+				par1EntityPlayer.sendChatToPlayer(par1EntityPlayer.getTranslator().translateKey("entity.EntityChesty.not_yours"));
+			}
+			return false;
 		}
 	}
 
@@ -168,14 +243,15 @@ public class EntityChesty extends EntityTameable implements IInventory {
 	protected boolean canDespawn() {
 		return !isTamed() || getOwner() == null;
 	}
-	
+
 	@Override
 	public void setDead() {
 		super.setDead();
-		if(worldObj.isRemote)
+		if(worldObj.isRemote) {
 			for(int i = 0; i < 100; i++) {
 				worldObj.spawnParticle("enchantmenttable", posX + (rand.nextDouble() * 2.5) - (rand.nextDouble() * 2.5), posY + (rand.nextDouble() * 2.5) - (rand.nextDouble() * 2.5), posZ + (rand.nextDouble() * 2.5) - (rand.nextDouble() * 2.5), (rand.nextDouble() * 2.5) - (rand.nextDouble() * 2.5), (rand.nextDouble() * 2.5) - (rand.nextDouble() * 2.5), (rand.nextDouble() * 2.5) - (rand.nextDouble() * 2.5));
 			}
+		}
 	}
 
 	public int getItemInUseCount() {
@@ -256,9 +332,13 @@ public class EntityChesty extends EntityTameable implements IInventory {
 	public int getSizeInventory() {
 		return inventoryContents.length;
 	}
-	
+
 	public int getActualSizeInventory() {
-		return slotsCount-SPECIAL_SLOTS_SIZE;
+		return inventoryContents.length - SPECIAL_SLOTS_SIZE;
+	}
+
+	public int getRowLength() {
+		return rowLength;
 	}
 
 	/**
@@ -283,8 +363,8 @@ public class EntityChesty extends EntityTameable implements IInventory {
 	 */
 	@Override
 	public void onInventoryChanged() {
-		if(chestySceptre != null && !worldObj.isRemote && getOwner() != null && getOwner() instanceof EntityPlayer) {
-			ItemStack actualRod = findChestySceptreOnPlayer((EntityPlayer)getOwner(), chestySceptre);
+		if(!worldObj.isRemote && getOwner() != null && getOwner() instanceof EntityPlayer) {
+			ItemStack actualRod = findChestySceptreOnPlayer((EntityPlayer) getOwner(), this);
 			if(actualRod == null) {
 				setDead();
 				return;
@@ -314,23 +394,39 @@ public class EntityChesty extends EntityTameable implements IInventory {
 	@Override
 	public void openChest() {
 		++numUsingPlayers;
-		
+
 	}
 
 	@Override
 	public void closeChest() {
 		--numUsingPlayers;
 	}
-	
-	public static ItemStack findChestySceptreOnPlayer(EntityPlayer player, ItemStack chestySceptre) {
-		if(player == null || chestySceptre == null || !(chestySceptre.getItem() instanceof ItemChestySceptre) || chestySceptre.getTagCompound() == null)
+
+	@Override
+	public String getTexture() {
+		if(Chesty.ironChestExists) {
+			int subType = dataWatcher.getWatchableObjectByte(DATA_WATCHER_SUBTYPE);
+			if(subType > 0) {
+				IronChestEntry entry = IronChestSupport.getIronChestEntry(subType - 1);
+				if(entry != null) {
+					return entry.textureLocation;
+				}
+			}
+		}
+		return super.getTexture();
+	}
+
+	public static ItemStack findChestySceptreOnPlayer(EntityPlayer player, EntityChesty chesty) {
+		if(player == null) {
 			return null;
+		}
 		ArrayList<ItemStack> items = new ArrayList<ItemStack>(Arrays.asList(player.inventory.mainInventory));
 		items.add(player.inventory.getItemStack());
 		for(ItemStack mainInventoryItem : items) {
-			if(mainInventoryItem == null || !mainInventoryItem.hasTagCompound())
+			if(mainInventoryItem == null || !mainInventoryItem.hasTagCompound() || !(mainInventoryItem.getItem() instanceof ItemChestySceptre)) {
 				continue;
-			if(chestySceptre.getTagCompound().getInteger("ChestyEntity") == mainInventoryItem.getTagCompound().getInteger("ChestyEntity")) {
+			}
+			if(chesty.entityId == mainInventoryItem.getTagCompound().getInteger("ChestyEntity")) {
 				return mainInventoryItem;
 			}
 		}

@@ -2,6 +2,7 @@ package net.nexustools.chesty.item;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import java.util.logging.Level;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -12,7 +13,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
+import net.nexustools.chesty.Chesty;
 import net.nexustools.chesty.entity.passive.EntityChesty;
+import net.nexustools.chesty.support.IronChestEntry;
+import net.nexustools.chesty.support.IronChestSupport;
 
 public class ItemChestySceptre extends Item {
 
@@ -65,25 +69,34 @@ public class ItemChestySceptre extends Item {
 				}
 			}
 			if(!player.isSneaking() && !itemStack.getTagCompound().hasKey("ChestyEntity")) {
+				itemStack.getTagCompound().setString("ChestyOwner", player.username);
+				
 				EntityChesty entityChesty = new EntityChesty(world);
 				entityChesty.setPosition((double)par4 + (entityChesty.width / 2), (double)par5+entityChesty.height, (double)par6 + (entityChesty.width / 2)); //Todo: Find a valid block somewhere nearby.
 				entityChesty.setTamed(true);
 				entityChesty.setOwner(player.username);
 				
+				if(Chesty.ironChestExists && itemStack.getTagCompound().hasKey("ChestyIronChestSubType")) {
+					entityChesty.getDataWatcher().updateObject(EntityChesty.DATA_WATCHER_SUBTYPE, new Byte((byte)(itemStack.getTagCompound().getInteger("ChestyIronChestSubType")+1)));
+					IronChestEntry entry = IronChestSupport.getIronChestEntry(itemStack.getTagCompound().getInteger("ChestyIronChestSubType"));
+					entityChesty.slotsCount = (EntityChesty.SPECIAL_SLOTS_SIZE + entry.size - (entry.rowLength*3));
+					entityChesty.rowLength = entry.rowLength;
+					entityChesty.inventoryContents = new ItemStack[entityChesty.slotsCount+1];
+				}
+				
+				world.spawnEntityInWorld(entityChesty);
+				itemStack.getTagCompound().setInteger("ChestyEntity", entityChesty.entityId);
+				
 				NBTTagList var2 = itemStack.getTagCompound().getTagList("ChestyItems");
-				entityChesty.slotsCount = Math.max(EntityChesty.DEFAULT_ACTUAL_INVENTORY_SIZE+EntityChesty.SPECIAL_SLOTS_SIZE, var2.tagCount());
-				entityChesty.inventoryContents = new ItemStack[entityChesty.slotsCount+1];
 				for(int var3 = 0; var3 < var2.tagCount(); ++var3) {
+					if(var3 >= entityChesty.inventoryContents.length) {
+						Chesty.getLogger().log(Level.WARNING, "Too many items trying to be loaded, not loading anymore.");
+						break;
+					}
 					NBTTagCompound var4 = (NBTTagCompound) var2.tagAt(var3);
 					int var5 = var4.getByte("Slot") & 255;
 					entityChesty.setInventorySlotContents(var5, ItemStack.loadItemStackFromNBT(var4));
 				}
-				
-				world.spawnEntityInWorld(entityChesty);
-
-				itemStack.getTagCompound().setString("ChestyOwner", player.username);
-				itemStack.getTagCompound().setInteger("ChestyEntity", entityChesty.entityId);
-				entityChesty.chestySceptre = itemStack;
 				return true;
 			}
 		}

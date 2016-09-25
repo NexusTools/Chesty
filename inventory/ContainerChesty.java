@@ -1,7 +1,5 @@
 package net.nexustools.chesty.inventory;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -11,7 +9,6 @@ import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.nexustools.chesty.Chesty;
 import net.nexustools.chesty.entity.passive.EntityChesty;
-import net.nexustools.chesty.item.ItemChestySceptre;
 
 public class ContainerChesty extends Container {
 
@@ -20,25 +17,28 @@ public class ContainerChesty extends Container {
 	public ContainerChesty(InventoryPlayer inventoryPlayer, EntityChesty chesty) {
 		this.chesty = chesty;
 		chesty.openChest();
-		this.addSlotToContainer(new SlotChestyFood(chesty, 0, 8, 18));
-		this.addSlotToContainer(new SlotChestyFood(chesty, 1, 26, 18));
+		int xAdd = chesty.getRowLength() == 12 ? 27 : 0;
+		this.addSlotToContainer(new SlotChestyFood(chesty, 0, 8 + xAdd, 18));
+		this.addSlotToContainer(new SlotChestyFood(chesty, 1, 26 + xAdd, 18));
 		for(int i = 0; i < 4; i++) {
-			this.addSlotToContainer(new SlotChestyArmor(chesty, 2 + i, 98 + (i * 18), 18, i));
+			this.addSlotToContainer(new SlotChestyArmor(chesty, 2 + i, 98 + (i * 18) + xAdd, 18, i));
 		}
-		for(int var3 = 0; var3 < chesty.getSizeInventory() / 9; ++var3) {
-			for(int var4 = 0; var4 < 9; ++var4) {
-				this.addSlotToContainer(new SlotChesty(chesty, var4 + var3 * 9 + EntityChesty.SPECIAL_SLOTS_SIZE, 8 + var4 * 18, 40 + var3 * 18));
+		int lastY = 0;
+		for(int var3 = 0; var3 < chesty.getActualSizeInventory() / chesty.getRowLength(); ++var3) {
+			for(int var4 = 0; var4 < chesty.getRowLength(); ++var4) {
+				this.addSlotToContainer(new SlotChesty(chesty, var4 + var3 * chesty.getRowLength() + EntityChesty.SPECIAL_SLOTS_SIZE, 8 + var4 * 18, (lastY = 40 + var3 * 18)));
 			}
 		}
 
+		int lastY2 = 0;
 		for(int var3 = 0; var3 < 3; ++var3) {
 			for(int var4 = 0; var4 < 9; ++var4) {
-				this.addSlotToContainer(new Slot(inventoryPlayer, var4 + var3 * 9 + 9, 8 + var4 * 18, 90 + var3 * 18));
+				this.addSlotToContainer(new Slot(inventoryPlayer, var4 + var3 * 9 + 9, 8 + var4 * 18 + xAdd, (lastY2 = lastY + 32 + var3 * 18)));
 			}
 		}
 
 		for(int var3 = 0; var3 < 9; ++var3) {
-			this.addSlotToContainer(new Slot(inventoryPlayer, var3, 8 + var3 * 18, 148));
+			this.addSlotToContainer(new Slot(inventoryPlayer, var3, 8 + var3 * 18 + xAdd, lastY2 + 22));
 		}
 	}
 
@@ -46,24 +46,7 @@ public class ContainerChesty extends Container {
 	public void addCraftingToCrafters(ICrafting par1ICrafting) {
 		super.addCraftingToCrafters(par1ICrafting);
 	}
-
-	/**
-	 * Looks for changes made in the container, sends them to every listener.
-	 */
-	@Override
-	public void detectAndSendChanges() {
-		super.detectAndSendChanges();
-
-		for(int var1 = 0; var1 < this.crafters.size(); ++var1) {
-			ICrafting var2 = (ICrafting) this.crafters.get(var1);
-		}
-	}
-
-	@SideOnly(Side.CLIENT)
-	@Override
-	public void updateProgressBar(int par1, int par2) {
-	}
-
+	
 	@Override
 	public boolean canInteractWith(EntityPlayer par1EntityPlayer) {
 		return this.chesty.isUseableByPlayer(par1EntityPlayer);
@@ -74,15 +57,9 @@ public class ContainerChesty extends Container {
 		if(chesty == null || chesty.isDead) {
 			return null;
 		}
-		if(!chesty.worldObj.isRemote && par1 >= 0 && getSlot(par1).getHasStack() && !(getSlot(par1).getStack().getItem() instanceof ItemChestySceptre)) {
-			if(chesty.chestySceptre == null || chesty.chestySceptre.getTagCompound() == null || chesty.getOwner() == null || !(chesty.getOwner() instanceof EntityPlayer)) {
+		if(par1 >= 0 && getSlot(par1).getHasStack()) {
+			if(chesty.getOwner() == null || !(chesty.getOwner() instanceof EntityPlayer) || EntityChesty.findChestySceptreOnPlayer(par4EntityPlayer, chesty) == null) {
 				return null;
-			} else {
-				EntityPlayer player = (EntityPlayer) chesty.getOwner();
-				ItemStack actualSceptre = EntityChesty.findChestySceptreOnPlayer(player, chesty.chestySceptre);
-				if(actualSceptre == null) {
-					return null;
-				}
 			}
 		}
 		return super.slotClick(par1, par2, par3, par4EntityPlayer);
