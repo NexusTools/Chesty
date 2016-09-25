@@ -33,9 +33,8 @@ public class EntityChesty extends EntityTameable implements IInventory {
 	public static final int DEFAULT_ACTUAL_INVENTORY_SIZE = 18;
 	public static final int DEFAULT_ROW_SIZE = 9;
 
-	public static final int DATA_WATCHER_SLOTS_COUNT = 18;
-	public static final int DATA_WATCHER_ROW_LENGTH = 19;
-	public static final int DATA_WATCHER_SUBTYPE = 20;
+	public static final int DATA_WATCHER_SUBTYPE = 18;
+	public static final int DATA_WATCHER_PLAYERS_USING = 19;
 
 	private int itemInUseCount;
 
@@ -70,6 +69,7 @@ public class EntityChesty extends EntityTameable implements IInventory {
 	protected void entityInit() {
 		super.entityInit();
 		this.dataWatcher.addObject(DATA_WATCHER_SUBTYPE, new Byte((byte) 0));
+		this.dataWatcher.addObject(DATA_WATCHER_PLAYERS_USING, new Integer(0));
 	}
 
 	@Override
@@ -104,6 +104,7 @@ public class EntityChesty extends EntityTameable implements IInventory {
 						}
 					}
 				}
+				dataWatcher.updateObject(DATA_WATCHER_PLAYERS_USING, numUsingPlayers);
 			}
 		} else if(!spawnParticles && worldObj.isRemote) {
 			spawnParticles = true;
@@ -115,10 +116,11 @@ public class EntityChesty extends EntityTameable implements IInventory {
 		prevLidAngle = lidAngle;
 		float var1 = 0.1F;
 
-		if(numUsingPlayers > 0 && lidAngle == 0.0F) {
+		if(!worldObj.isRemote && numUsingPlayers > 0 && lidAngle == 0.0F) {
 			worldObj.playSoundEffect((double) posX + 0.5D, (double) posY + 0.5D, (double) posZ + 0.5D, "random.chestopen", 0.5F, worldObj.rand.nextFloat() * 0.1F + 0.9F);
+		} else if(worldObj.isRemote) {
+			numUsingPlayers = dataWatcher.getWatchableObjectInt(DATA_WATCHER_PLAYERS_USING);
 		}
-
 		if(numUsingPlayers == 0 && lidAngle > 0.0F || numUsingPlayers > 0 && lidAngle < 1.0F) {
 			float var9 = lidAngle;
 
@@ -404,12 +406,13 @@ public class EntityChesty extends EntityTameable implements IInventory {
 	@Override
 	public void openChest() {
 		++numUsingPlayers;
-
+		dataWatcher.updateObject(DATA_WATCHER_PLAYERS_USING, numUsingPlayers);
 	}
 
 	@Override
 	public void closeChest() {
 		--numUsingPlayers;
+		dataWatcher.updateObject(DATA_WATCHER_PLAYERS_USING, numUsingPlayers);
 	}
 
 	@Override
