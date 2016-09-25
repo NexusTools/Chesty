@@ -9,9 +9,12 @@ import net.nexustools.chesty.Chesty;
 
 public class IronChestSupport {
 	public static Item ironChestItem;
-	public static IronChestEntry[] ironChestEntries;
+	public static IronChestEntry[] ironChestEntries = null;
 	
 	public static void init() {
+		if(ironChestEntries != null) {
+			return;
+		}
 		try {
 			ArrayList<IronChestEntry> tempIronChestEntries = new ArrayList<IronChestEntry>();
 			Class ironChest = Class.forName("cpw.mods.ironchest.IronChest");
