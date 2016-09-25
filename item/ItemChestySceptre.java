@@ -82,6 +82,7 @@ public class ItemChestySceptre extends Item {
 					entityChesty.slotsCount = (EntityChesty.SPECIAL_SLOTS_SIZE + entry.size - (entry.rowLength*3));
 					entityChesty.rowLength = entry.rowLength;
 					entityChesty.inventoryContents = new ItemStack[entityChesty.slotsCount+1];
+					entityChesty.updateMaxHealth();
 				}
 				
 				world.spawnEntityInWorld(entityChesty);

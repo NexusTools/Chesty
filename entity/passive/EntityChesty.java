@@ -48,6 +48,7 @@ public class EntityChesty extends EntityTameable implements IInventory {
 	public int ticksSinceSync = 59;
 	public int numUsingPlayers = 0;
 	public boolean spawnParticles = false;
+	public int maxHealth;
 
 	public EntityChesty(World world) {
 		super(world);
@@ -62,6 +63,7 @@ public class EntityChesty extends EntityTameable implements IInventory {
 		slotsCount = SPECIAL_SLOTS_SIZE + DEFAULT_ACTUAL_INVENTORY_SIZE;
 		rowLength = DEFAULT_ROW_SIZE;
 		inventoryContents = new ItemStack[slotsCount + 1];
+		updateMaxHealth();
 	}
 
 	@Override
@@ -170,6 +172,7 @@ public class EntityChesty extends EntityTameable implements IInventory {
 							slotsCount = (SPECIAL_SLOTS_SIZE + entry.size - (entry.rowLength * 3));
 							rowLength = entry.rowLength;
 							inventoryContents = new ItemStack[slotsCount + 1];
+							updateMaxHealth();
 							chestyRod.getTagCompound().setInteger("ChestyIronChestSubType", entry.subType);
 							dataWatcher.updateObject(DATA_WATCHER_SUBTYPE, new Byte((byte) (entry.subType + 1)));
 							if(!par1EntityPlayer.capabilities.isCreativeMode && --par1EntityPlayer.getCurrentEquippedItem().stackSize <= 0) {
@@ -195,6 +198,7 @@ public class EntityChesty extends EntityTameable implements IInventory {
 					slotsCount = SPECIAL_SLOTS_SIZE + DEFAULT_ACTUAL_INVENTORY_SIZE;
 					rowLength = DEFAULT_ROW_SIZE;
 					inventoryContents = new ItemStack[slotsCount + 1];
+					updateMaxHealth();
 					dataWatcher.updateObject(DATA_WATCHER_SUBTYPE, new Byte((byte) 0));
 
 					if(!par1EntityPlayer.capabilities.isCreativeMode && --par1EntityPlayer.getCurrentEquippedItem().stackSize <= 0) {
@@ -214,6 +218,7 @@ public class EntityChesty extends EntityTameable implements IInventory {
 				slotsCount = (EntityChesty.SPECIAL_SLOTS_SIZE + entry.size - (entry.rowLength * 3));
 				rowLength = entry.rowLength;
 				inventoryContents = new ItemStack[slotsCount + 1];
+				updateMaxHealth();
 			}
 			return true;
 		} else {
@@ -236,7 +241,12 @@ public class EntityChesty extends EntityTameable implements IInventory {
 
 	@Override
 	public int getMaxHealth() {
-		return 20;
+		return maxHealth;
+	}
+	
+	public void updateMaxHealth() {
+		this.health = getActualSizeInventory();
+		maxHealth = health;
 	}
 
 	@Override
