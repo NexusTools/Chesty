@@ -90,7 +90,7 @@ public class ModelChesty extends ModelBase {
 		
 		EntityChesty chesty = (EntityChesty)par7Entity;
 		lastBreathRotateX = chesty.lidAngle != 0 ? lastBreathRotateX : -Math.abs(MathHelper.cos(par3 * 0.1994F) * 0.2F);
-		chestyLid.rotateAngleX = -Math.abs(MathHelper.cos(par1 * 0.5392F) * 0.4F) + lastBreathRotateX - (chesty.lidAngle * (float)Math.PI / 2.0F);
+		chestyLid.rotateAngleX = -Math.abs(MathHelper.cos(par1 * 0.4392F) * 0.3F) + lastBreathRotateX - (chesty.lidAngle * (float)Math.PI / 2.0F);
 		chestyLock.rotateAngleX = chestyLid.rotateAngleX;
 	}
 }
