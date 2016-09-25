@@ -46,7 +46,7 @@ public class EntityChesty extends EntityTameable implements IInventory {
 	public float lidAngle = 0;
 	public int ticksSinceSync = 59;
 	public int numUsingPlayers = 0;
-	public boolean spawnParticles = false;
+	public boolean spawnParticles;
 	public int maxHealth;
 
 	public EntityChesty(World world) {
@@ -63,6 +63,7 @@ public class EntityChesty extends EntityTameable implements IInventory {
 		rowLength = DEFAULT_ROW_SIZE;
 		inventoryContents = new ItemStack[slotsCount + 1];
 		updateMaxHealth();
+		spawnParticles = !world.isRemote;
 	}
 
 	@Override
@@ -114,7 +115,6 @@ public class EntityChesty extends EntityTameable implements IInventory {
 		}
 
 		prevLidAngle = lidAngle;
-		float var1 = 0.1F;
 
 		if(!worldObj.isRemote && numUsingPlayers > 0 && lidAngle == 0.0F) {
 			worldObj.playSoundEffect((double) posX + 0.5D, (double) posY + 0.5D, (double) posZ + 0.5D, "random.chestopen", 0.5F, worldObj.rand.nextFloat() * 0.1F + 0.9F);
@@ -122,25 +122,16 @@ public class EntityChesty extends EntityTameable implements IInventory {
 			numUsingPlayers = dataWatcher.getWatchableObjectInt(DATA_WATCHER_PLAYERS_USING);
 		}
 		if(numUsingPlayers == 0 && lidAngle > 0.0F || numUsingPlayers > 0 && lidAngle < 1.0F) {
-			float var9 = lidAngle;
-
 			if(lidAngle < 1.0F && numUsingPlayers > 0) {
-				lidAngle += var1;
-
-				if(lidAngle > 1.0F) {
+				if((lidAngle += 0.075F) > 1.0F) {
 					lidAngle = 1.0F;
 				}
 			} else if(numUsingPlayers == 0 && lidAngle > 0F) {
-				lidAngle -= var1;
-				if(lidAngle < 0.0F) {
+				if((lidAngle -= 0.075F) < 0.0F) {
 					lidAngle = 0.0F;
 				}
 			}
-
-			float var10 = 0.3F;
-
-			if(lidAngle < var10 && var9 >= var10) {
-
+			if(!worldObj.isRemote && lidAngle < 0.5F && prevLidAngle > 0.5F) {
 				worldObj.playSoundEffect((double) posX + 0.5D, (double) posY + 0.5D, (double) posZ + 0.5D, "random.chestclosed", 0.5F, worldObj.rand.nextFloat() * 0.1F + 0.9F);
 			}
 		}
@@ -152,57 +143,48 @@ public class EntityChesty extends EntityTameable implements IInventory {
 		if(isTamed() && getOwnerName().equals(par1EntityPlayer.username) && findChestySceptreOnPlayer(par1EntityPlayer, this) != null) {
 			ItemStack chestyRod = findChestySceptreOnPlayer(par1EntityPlayer, this);
 			if(Chesty.ironChestExists && par1EntityPlayer.getCurrentEquippedItem() != null && (par1EntityPlayer.getCurrentEquippedItem().getItem() == IronChestSupport.ironChestItem || par1EntityPlayer.getCurrentEquippedItem().getItem().itemID == Block.chest.blockID)) {
-				if(par1EntityPlayer.getCurrentEquippedItem().getItem() == IronChestSupport.ironChestItem) {
-					IronChestEntry entry = IronChestSupport.getIronChestEntry(par1EntityPlayer.getCurrentEquippedItem().getItemDamage());
-					if(!chestyRod.getTagCompound().hasKey("ChestyIronChestSubType") || entry.subType != chestyRod.getTagCompound().getInteger("ChestyIronChestSubType")) {
-						boolean foundItem = false;
-						for(ItemStack s : inventoryContents) {
-							if(s != null) {
-								foundItem = true;
-								break;
-							}
-						}
-						if(foundItem) {
-							if(!par1EntityPlayer.worldObj.isRemote) {
-								par1EntityPlayer.sendChatToPlayer(par1EntityPlayer.getTranslator().translateKey("entity.EntityChesty.please_empty"));
-							}
-							return false;
-						}
-						if(entry == null) {
-							Chesty.getLogger().log(Level.WARNING, "IronChestEntry was somehow null when interacting with Chesty. This is a possible problem with IronChest support and should be further investigated!");
-						} else {
-							slotsCount = (SPECIAL_SLOTS_SIZE + entry.size - (entry.rowLength * 3));
-							rowLength = entry.rowLength;
-							inventoryContents = new ItemStack[slotsCount + 1];
-							updateMaxHealth();
-							chestyRod.getTagCompound().setInteger("ChestyIronChestSubType", entry.subType);
-							dataWatcher.updateObject(DATA_WATCHER_SUBTYPE, new Byte((byte) (entry.subType + 1)));
-							if(!par1EntityPlayer.capabilities.isCreativeMode && --par1EntityPlayer.getCurrentEquippedItem().stackSize <= 0) {
-								par1EntityPlayer.inventory.setInventorySlotContents(par1EntityPlayer.inventory.currentItem, (ItemStack) null);
-							}
-						}
-					}
-				} else if(chestyRod.getTagCompound().hasKey("ChestyIronChestSubType") && par1EntityPlayer.getCurrentEquippedItem().getItem().itemID == Block.chest.blockID) {
-					boolean foundItem = false;
-					for(ItemStack s : inventoryContents) {
-						if(s != null) {
-							foundItem = true;
-							break;
-						}
-					}
-					if(foundItem) {
+				if(par1EntityPlayer.getCurrentEquippedItem().getItem().itemID == Block.chest.blockID && chestyRod.getTagCompound().hasKey("ChestyIronChestSubType")) {
+					if(containsItems()) {
 						if(!par1EntityPlayer.worldObj.isRemote) {
 							par1EntityPlayer.sendChatToPlayer(par1EntityPlayer.getTranslator().translateKey("entity.EntityChesty.please_empty"));
 						}
 						return false;
 					}
-					chestyRod.getTagCompound().removeTag("ChestyIronChestSubType");
+
 					slotsCount = SPECIAL_SLOTS_SIZE + DEFAULT_ACTUAL_INVENTORY_SIZE;
 					rowLength = DEFAULT_ROW_SIZE;
 					inventoryContents = new ItemStack[slotsCount + 1];
-					updateMaxHealth();
+					chestyRod.getTagCompound().removeTag("ChestyIronChestSubType");
 					dataWatcher.updateObject(DATA_WATCHER_SUBTYPE, new Byte((byte) 0));
+					updateMaxHealth();
+					
+					if(!par1EntityPlayer.capabilities.isCreativeMode && --par1EntityPlayer.getCurrentEquippedItem().stackSize <= 0) {
+						par1EntityPlayer.inventory.setInventorySlotContents(par1EntityPlayer.inventory.currentItem, (ItemStack) null);
+					}
+				} else if(par1EntityPlayer.getCurrentEquippedItem().getItem() == IronChestSupport.ironChestItem) {
+					IronChestEntry entry = IronChestSupport.getIronChestEntry(par1EntityPlayer.getCurrentEquippedItem().getItemDamage());
+					if(entry == null) {
+						Chesty.getLogger().log(Level.WARNING, "IronChestEntry was somehow null when interacting with Chesty. This is a possible problem with IronChest support and should be further investigated!");
+						return false;
+					}
+					if(chestyRod.getTagCompound().hasKey("ChestyIronChestSubType") && chestyRod.getTagCompound().getInteger("ChestyIronChestSubType") == entry.subType) {
+						return false;
+					}
 
+					if(containsItems()) {
+						if(!par1EntityPlayer.worldObj.isRemote) {
+							par1EntityPlayer.sendChatToPlayer(par1EntityPlayer.getTranslator().translateKey("entity.EntityChesty.please_empty"));
+						}
+						return false;
+					}
+
+					slotsCount = (SPECIAL_SLOTS_SIZE + entry.size - (entry.rowLength * 3));
+					rowLength = entry.rowLength;
+					inventoryContents = new ItemStack[slotsCount + 1];
+					chestyRod.getTagCompound().setInteger("ChestyIronChestSubType", entry.subType);
+					dataWatcher.updateObject(DATA_WATCHER_SUBTYPE, new Byte((byte) (entry.subType + 1)));
+					updateMaxHealth();
+					
 					if(!par1EntityPlayer.capabilities.isCreativeMode && --par1EntityPlayer.getCurrentEquippedItem().stackSize <= 0) {
 						par1EntityPlayer.inventory.setInventorySlotContents(par1EntityPlayer.inventory.currentItem, (ItemStack) null);
 					}
@@ -216,6 +198,7 @@ public class EntityChesty extends EntityTameable implements IInventory {
 				player.openContainer.windowId = player.currentWindowId;
 				player.openContainer.addCraftingToCrafters(player);
 			} else if(Chesty.ironChestExists && chestyRod.getTagCompound().hasKey("ChestyIronChestSubType")) {
+				//TODO: Find a better way to sync client-side inventory size.
 				IronChestEntry entry = IronChestSupport.getIronChestEntry(chestyRod.getTagCompound().getInteger("ChestyIronChestSubType"));
 				slotsCount = (EntityChesty.SPECIAL_SLOTS_SIZE + entry.size - (entry.rowLength * 3));
 				rowLength = entry.rowLength;
@@ -245,7 +228,7 @@ public class EntityChesty extends EntityTameable implements IInventory {
 	public int getMaxHealth() {
 		return maxHealth;
 	}
-	
+
 	public void updateMaxHealth() {
 		this.health = getActualSizeInventory();
 		maxHealth = health;
@@ -270,18 +253,11 @@ public class EntityChesty extends EntityTameable implements IInventory {
 		return itemInUseCount;
 	}
 
-	/**
-	 * Returns the stack in slot i
-	 */
 	@Override
 	public ItemStack getStackInSlot(int par1) {
 		return inventoryContents[par1];
 	}
 
-	/**
-	 * Removes from an inventory slot (first arg) up to a specified number
-	 * (second arg) of items and returns them in a new stack.
-	 */
 	@Override
 	public ItemStack decrStackSize(int par1, int par2) {
 		if(inventoryContents[par1] != null) {
@@ -307,11 +283,6 @@ public class EntityChesty extends EntityTameable implements IInventory {
 		}
 	}
 
-	/**
-	 * When some containers are closed they call this on each slot, then drop
-	 * whatever it returns as an EntityItem - like when you close a workbench
-	 * GUI.
-	 */
 	@Override
 	public ItemStack getStackInSlotOnClosing(int par1) {
 		if(inventoryContents[par1] != null) {
@@ -323,10 +294,6 @@ public class EntityChesty extends EntityTameable implements IInventory {
 		}
 	}
 
-	/**
-	 * Sets the given item stack to the specified slot in the inventory (can be
-	 * crafting or armor sections).
-	 */
 	@Override
 	public void setInventorySlotContents(int par1, ItemStack par2ItemStack) {
 		inventoryContents[par1] = par2ItemStack;
@@ -337,9 +304,6 @@ public class EntityChesty extends EntityTameable implements IInventory {
 		onInventoryChanged();
 	}
 
-	/**
-	 * Returns the number of slots in the inventory.
-	 */
 	@Override
 	public int getSizeInventory() {
 		return inventoryContents.length;
@@ -353,26 +317,16 @@ public class EntityChesty extends EntityTameable implements IInventory {
 		return rowLength;
 	}
 
-	/**
-	 * Returns the name of the inventory.
-	 */
 	@Override
 	public String getInvName() {
 		return inventoryTitle;
 	}
 
-	/**
-	 * Returns the maximum stack size for a inventory slot. Seems to always be
-	 * 64, possibly will be extended. *Isn't this more of a set than a get?*
-	 */
 	@Override
 	public int getInventoryStackLimit() {
 		return 64;
 	}
 
-	/**
-	 * Called when an the contents of an Inventory change, usually
-	 */
 	@Override
 	public void onInventoryChanged() {
 		if(!worldObj.isRemote && getOwner() != null && getOwner() instanceof EntityPlayer) {
@@ -394,10 +348,6 @@ public class EntityChesty extends EntityTameable implements IInventory {
 		}
 	}
 
-	/**
-	 * Do not make give this method the name canInteractWith because it clashes
-	 * with Container
-	 */
 	@Override
 	public boolean isUseableByPlayer(EntityPlayer par1EntityPlayer) {
 		return getOwnerName().equals(par1EntityPlayer.username);
@@ -444,5 +394,14 @@ public class EntityChesty extends EntityTameable implements IInventory {
 			}
 		}
 		return null;
+	}
+
+	public boolean containsItems() {
+		for(ItemStack s : inventoryContents) {
+			if(s != null) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
