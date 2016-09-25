@@ -8,7 +8,7 @@ Chesty is simply a fully functioning chest with additional features that will lo
 * You can store a full set of armor, and two utility slots for food or tools only, and then 18 items of your choice (9 less than a stationary chest).
 * You use the Sceptre of Chests to spawn him, while you have the sceptre with you he will remain spawned. You can shift+click the sceptre to despawn him as you please.
 * The Sceptre of Chests is the actual item storage, meaning you can kill other people for the sceptres and actually loot their items by spawning their  Chesty (Which also happens to be yours at that point).
-* If you have the IronChest mod installed you are able to right click on Chesty with any chest to upgrade it to that version, increasing the inventory size of chesty. Using a normal chest will downgrade him to his default state. Currently Chesty has to be completely empty in order to upgrade/downgrade.
+* If you have the IronChest mod installed you are able to right click on Chesty with any chest to upgrade it to that version, increasing the inventory size of chesty. Using a normal chest will downgrade him to his default state. Currently Chesty has to be completely empty in order to upgrade/downgrade. Can be disabled, but if a server has it enabled then support will be forcefully enabled.
 
 ### Planned/Potential Content
 * A slot for food in Chesty to allow Chesty to heal himself.
@@ -16,3 +16,5 @@ Chesty is simply a fully functioning chest with additional features that will lo
 * Potential chest upgrades based on the IronChests, which could be increase size and the base armor of Chesty.
 * Potentially a way to have Chesty help defend. Or maybe once Chesty's owner dies he becomes rabid and begins killing everything.
 * Potentially let you right click on a chest with the Sceptre of Chests to automatically clone that one into a Chesty.
+* A garbage slot (suggested that it 'poops' it out in some way)
+* Picks up nearby items (Possible a checkbox to enable this, somehow?)
