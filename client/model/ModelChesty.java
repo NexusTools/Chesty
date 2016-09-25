@@ -18,6 +18,8 @@ public class ModelChesty extends ModelBase {
 	public final ModelRenderer chestyLegFrontRight;
 	public final ModelRenderer chestyLegBackLeft;
 	public final ModelRenderer chestyLegBackRight;
+	public final ModelRenderer chestyTongue;
+	public final ModelRenderer chestyTongueBottom;
 	public float lastBreathRotateX;
 
 	public ModelChesty() {
@@ -59,6 +61,16 @@ public class ModelChesty extends ModelBase {
 		chestyLegBackRight.setRotationPoint(6F, 16.5F, 4F);
 		chestyLegBackRight.setTextureSize(textureWidth, textureHeight);
 		setRotation(chestyLegBackRight, 0F, 0F, -0.3490659F);
+		chestyTongue = new ModelRenderer(this, 0, 19);
+		chestyTongue.addBox(0F, 0F, 0F, 4, 6, 1);
+		chestyTongue.setRotationPoint(-3F, 7.5F, -1.4F);
+		chestyTongue.setTextureSize(textureWidth, textureHeight);
+		setRotation(chestyTongue, -1.570796F, 0.3665191F, 0F);
+		chestyTongueBottom = new ModelRenderer(this, 0, 5);
+		chestyTongueBottom.addBox(1F, 0F, 0F, 2, 6, 1);
+		chestyTongueBottom.setRotationPoint(-3F, 8.5F, -1.4F);
+		chestyTongueBottom.setTextureSize(textureWidth, textureHeight);
+		setRotation(chestyTongueBottom, -1.570796F, 0.3665191F, 0F);
 	}
 
 	@Override
@@ -72,6 +84,8 @@ public class ModelChesty extends ModelBase {
 		chestyLegFrontRight.render(par7);
 		chestyLegBackLeft.render(par7);
 		chestyLegBackRight.render(par7);
+		chestyTongue.render(par7);
+		chestyTongueBottom.render(par7);
 	}
 
 	private void setRotation(ModelRenderer model, float x, float y, float z) {
@@ -83,14 +97,14 @@ public class ModelChesty extends ModelBase {
 	@Override
 	public void setRotationAngles(float par1, float par2, float par3, float par4, float par5, float par6, Entity par7Entity) {
 		super.setRotationAngles(par1, par2, par3, par4, par5, par6, par7Entity);
-        this.chestyLegFrontLeft.rotateAngleX = MathHelper.cos(par1 * 0.9992F) * 1.4F * par2;
-        this.chestyLegFrontRight.rotateAngleX = MathHelper.cos(par1 * 0.9992F + (float)Math.PI) * 1.4F * par2;
-        this.chestyLegBackLeft.rotateAngleX = MathHelper.cos(par1 * 0.9992F + (float)Math.PI) * 1.4F * par2;
-        this.chestyLegBackRight.rotateAngleX = MathHelper.cos(par1 * 0.9992F) * 1.4F * par2;
-		
-		EntityChesty chesty = (EntityChesty)par7Entity;
-		lastBreathRotateX = chesty.lidAngle != 0 ? lastBreathRotateX : -Math.abs(MathHelper.cos(par3 * 0.1994F) * 0.2F);
-		chestyLid.rotateAngleX = -Math.abs(MathHelper.cos(par1 * 0.4392F) * 0.3F) + lastBreathRotateX - (chesty.lidAngle * (float)Math.PI / 2.0F);
+		this.chestyLegFrontLeft.rotateAngleX = MathHelper.cos(par1 * 0.9992F) * 1.4F * par2;
+		this.chestyLegFrontRight.rotateAngleX = MathHelper.cos(par1 * 0.9992F + (float) Math.PI) * 1.4F * par2;
+		this.chestyLegBackLeft.rotateAngleX = MathHelper.cos(par1 * 0.9992F + (float) Math.PI) * 1.4F * par2;
+		this.chestyLegBackRight.rotateAngleX = MathHelper.cos(par1 * 0.9992F) * 1.4F * par2;
+
+		EntityChesty chesty = (EntityChesty) par7Entity;
+		lastBreathRotateX = chesty.lidAngle != 0 ? lastBreathRotateX : -Math.abs(MathHelper.cos(par3 * 0.0894F) * 0.15F);
+		chestyLid.rotateAngleX = -Math.abs(MathHelper.cos(par1 * 0.4392F) * 0.3F) + lastBreathRotateX - (chesty.lidAngle * (float) Math.PI / 2.0F);
 		chestyLock.rotateAngleX = chestyLid.rotateAngleX;
 	}
 }
