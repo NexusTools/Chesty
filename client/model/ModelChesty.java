@@ -103,8 +103,13 @@ public class ModelChesty extends ModelBase {
 		this.chestyLegBackRight.rotateAngleX = MathHelper.cos(par1 * 0.9992F) * 1.4F * par2;
 
 		EntityChesty chesty = (EntityChesty) par7Entity;
-		lastBreathRotateX = chesty.lidAngle != 0 ? lastBreathRotateX : -Math.abs(MathHelper.cos(par3 * 0.0894F) * 0.15F);
+		lastBreathRotateX = chesty.lidAngle != 0 ? lastBreathRotateX : -Math.abs(MathHelper.cos(par3 * 0.0442F) * 0.15F);
 		chestyLid.rotateAngleX = -Math.abs(MathHelper.cos(par1 * 0.4392F) * 0.3F) + lastBreathRotateX - (chesty.lidAngle * (float) Math.PI / 2.0F);
 		chestyLock.rotateAngleX = chestyLid.rotateAngleX;
+		
+		chestyTongue.rotateAngleY = 0.3665191F + MathHelper.sin(par3 * 0.0194F) * 0.01F;
+		chestyTongue.rotateAngleX = -1.570796F + -lastBreathRotateX * 0.3F;
+		chestyTongueBottom.rotateAngleY = chestyTongue.rotateAngleY;
+		chestyTongueBottom.rotateAngleX = chestyTongue.rotateAngleX;
 	}
 }
