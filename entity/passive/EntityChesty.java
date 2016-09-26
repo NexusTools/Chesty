@@ -64,6 +64,7 @@ public class EntityChesty extends EntityTameable implements IInventory {
 		inventoryContents = new ItemStack[slotsCount + 1];
 		updateMaxHealth();
 		spawnParticles = !world.isRemote;
+		experienceValue = 0;
 	}
 
 	@Override
