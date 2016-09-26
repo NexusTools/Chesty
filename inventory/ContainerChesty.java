@@ -101,11 +101,14 @@ public class ContainerChesty extends Container {
 			}
 			if(canSortInventory) { //TODO: This can easily dupe items, should test this more.
 				if(slot < EntityChesty.SPECIAL_SLOTS_SIZE) { //Chesty's Special Slots
-					//From Chesty's special slots to any available inventory
-					if(!this.mergeItemStack(var5, chesty.getSizeInventory() - 1, chesty.getSizeInventory() - 1 + 27 + 9, false)) {
-						//Player inventory is full, try to move to chesty's inventory instead.
-						if(!this.mergeItemStack(var5, EntityChesty.SPECIAL_SLOTS_SIZE, chesty.getSizeInventory() - 1, false)) {
-							return null;
+					//From Chesty's special slots to any available player hotbar
+					if(!this.mergeItemStack(var5, chesty.getSizeInventory() - 1 + 27, chesty.getSizeInventory() - 1 + 27 + 9, false)) {
+						//Player hotbar is full, go to inventory instead
+						if(!this.mergeItemStack(var5, chesty.getSizeInventory() - 1, chesty.getSizeInventory() - 1 + 27, false)) {
+							//Player inventory is full, try to move to chesty's inventory instead.
+							if(!this.mergeItemStack(var5, EntityChesty.SPECIAL_SLOTS_SIZE, chesty.getSizeInventory() - 1, false)) {
+								return null;
+							}
 						}
 					}
 				} else if(slot >= EntityChesty.SPECIAL_SLOTS_SIZE && slot < chesty.getSizeInventory() - 1) { //Chesty's Inventory
